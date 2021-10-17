@@ -1,3 +1,4 @@
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
@@ -19,46 +20,49 @@ public class MyMemoryAllocationTest {
 	}
 	private MyMemoryAllocation prepHoles(String algo) {
 		MyMemoryAllocation mal= new MyMemoryAllocation(14, algo);
-		mal.alloc(1);
-		mal.alloc(3);
-		mal.alloc(2);
-		mal.alloc(2);
-		mal.alloc(1);
-		mal.alloc(1);
-		mal.alloc(1);
-		mal.alloc(2);
-		mal.free(2);
-		mal.free(7);
-		mal.free(10);
-		mal.free(12);
-		assert(mal.size() == 8);
-		assert(mal.max_size() == 3);
+		mal.alloc(1); //allocate 1 byte at index 1, arbitrary adress, index 0 reserved, memory is 14 bytes, 13 usable bytes total
+		mal.alloc(3); //allocate 3 bytes, indexes 2, 3, 4.
+		mal.alloc(2);// allocate 2 bytes, index 5 and 6
+		mal.alloc(2);// allocate 2 bytes, index 7 and 8
+		mal.alloc(1);// allocate 1 byte, index 9
+		mal.alloc(1);//allocate 1 byte, index 10
+		mal.alloc(1);//allocate 1 byte, index 11
+		mal.alloc(2);//allocate 2 bytes, index 12 and 13
+		mal.free(2);// free byte chunk at index 2, which frees byte 2, 3, and 4, 3 bytes total
+		mal.free(7);//frees 2 bytes at index 7 and 8
+		mal.free(10);//frees 1 byte at index 10
+		mal.free(12);//frees 2 bytes, at index 12 and 13
+		assert(mal.size() == 8);//assert total number of free is 8, which is true
+		assert(mal.max_size() == 3);//assert largest free chunk is 3 bytes big, which is true
 		return mal;
 	}
 	@Test
 	public void testFFAlloc() {
 		MyMemoryAllocation mal = prepHoles("FF");
-		assert(mal.alloc(1)==2);
-		assert(mal.alloc(2)==3);
-		assert(mal.alloc(2)==7);
+		assert(mal.alloc(1)==2);//assert that the first available alloc for 1 byte at index 2
+		assert(mal.alloc(2)==3);//assert that the first available alloc for 2 bytes at index 3.
+		assert(mal.alloc(2)==7);//assert that the first available alloc for 2 bytes at index 7
 		assert(mal.alloc(3)==0); //failed case ! fragments!
+		// assert that the first available alloc for 3 bytes is unavailable, mal.alloc(3) returns 0 for failed allocation, which equals the test case 0
 	}
 	@Test
 	public void testBFAlloc() {
 		MyMemoryAllocation mal = prepHoles("BF");
-		assert(mal.alloc(1)==10);
-		assert(mal.alloc(2)==7);
-		assert(mal.alloc(2)==12);
+		assert(mal.alloc(1)==10);// first best fit for 1 byte is at index 10
+		assert(mal.alloc(2)==7);// first best fit for 2 bytes is at index 7
+		assert(mal.alloc(2)==12);//first best fit for 2 bytes is at index 12
 		assert(mal.alloc(3)==2); //success! less fragments! 
+		//first best fit is available at index 2 for 3 bytes, the largest available freespace
 	}
 	@Test
 	public void testNFAlloc() {
 		MyMemoryAllocation mal = prepHoles("NF");
-		assert(mal.alloc(1)==2);
-		assert(mal.alloc(2)==7);
-		assert(mal.alloc(2)==12);
-		assert(mal.alloc(3)==0); //also failed case ! fragments!
+		assert(mal.alloc(1)==2);//first available alloc for 1 byte at index 2.
+		assert(mal.alloc(2)==7);//next available block starting at index 7, available for 2 byte alloc
+		assert(mal.alloc(2)==12);//next available block starting at 12 is available for 2 byte alloc
+		assert(mal.alloc(3)==0); //also failed case ! fragments! -> no available freespace for a 3 byte alloc
 		assert(mal.alloc(1)==3); //wrap around
+		//next available space for 1 byte starting at index 3, algorithm circles back to search for spaces again.
 	}
 
 	@Before
@@ -71,9 +75,10 @@ public class MyMemoryAllocationTest {
 	public void testFree1() {
 		MyMemoryAllocation mal = prepHoles("FF");
 		mal.free(2);//check if there is an error message
-		assert(errContent.toString().length() != 0);
-		mal.free(1); 
-		assert(mal.alloc(4)==1);
+		//creates error message because cannot free at index 2, already free.
+		assert(errContent.toString().length() != 0);//assert that error occurs is true
+		mal.free(1); //free successfull.
+		assert(mal.alloc(4)==1);//true, index 1-4 is free for a 4 byte alloc
 	}
 	@After
 	public void restoreStreams() {
@@ -83,9 +88,9 @@ public class MyMemoryAllocationTest {
 	@Test
 	public void testFree2() {
 		MyMemoryAllocation mal = prepHoles("FF");
-		mal.free(9);
-		mal.free(5);
-		assert(mal.max_size() == 9);
+		mal.free(9);//free 1 byte at index 9
+		mal.free(5);//free 2 bytes from index 5 to 6
+		assert(mal.max_size() == 9);//true, index 2 to 10 free, largest available free space is 9 bytes
 	}
 	
 	@Test
