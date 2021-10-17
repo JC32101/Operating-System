@@ -20,48 +20,49 @@ public class MyMemoryAllocationTest {
 	}
 	private MyMemoryAllocation prepHoles(String algo) {
 		MyMemoryAllocation mal= new MyMemoryAllocation(14, algo);
-		mal.alloc(1); //allocate 1 byte at index 1, arbitrary adress, index 0 reserved, memory is 14 bytes, 13 usable bytes total
-		mal.alloc(3); //allocate 3 bytes, indexes 2, 3, 4.
-		mal.alloc(2);// allocate 2 bytes, index 5 and 6
-		mal.alloc(2);// allocate 2 bytes, index 7 and 8
-		mal.alloc(1);// allocate 1 byte, index 9
-		mal.alloc(1);//allocate 1 byte, index 10
-		mal.alloc(1);//allocate 1 byte, index 11
-		mal.alloc(2);//allocate 2 bytes, index 12 and 13
-		mal.free(2);// free byte chunk at index 2, which frees byte 2, 3, and 4, 3 bytes total
-		mal.free(7);//frees 2 bytes at index 7 and 8
-		mal.free(10);//frees 1 byte at index 10
-		mal.free(12);//frees 2 bytes, at index 12 and 13
-		assert(mal.size() == 8);//assert total number of free is 8, which is true
-		assert(mal.max_size() == 3);//assert largest free chunk is 3 bytes big, which is true
+		mal.alloc(1); // (usedList)->[1,1] ||(freelist)->[2,12]
+		mal.alloc(3); // (usedList)->[1,1]->[2,3] ||(freelist)->[5,9]
+		mal.alloc(2); // (usedList)->[1,1]->[2,3]->[5,2] ||(freelist)->[7,7]
+		mal.alloc(2); // (usedList)->[1,1]->[2,3]->[5,2]->[7,2] ||(freelist)->[9,5]
+		mal.alloc(1); // (usedList)->[1,1]->[2,3]->[5,2]->[7,2]->[9,1] ||(freelist)->[10,4]
+		mal.alloc(1); // (usedList)->[1,1]->[2,3]->[5,2]->[7,2]->[9,1]->[10,1] ||(freelist)->[11,3]
+		mal.alloc(1); // (usedList)->[1,1]->[2,3]->[5,2]->[7,2]->[9,1]->[10,1]->[11,1] ||(freelist)->[12,3]
+		mal.alloc(2); // (usedList)->[1,1]->[2,3]->[5,2]->[7,2]->[9,1]->[10,1]->[11,1]->[12,2] ||(freelist)
+		mal.free(2);  // (usedList)->[1,1]->[5,2]->[7,2]->[9,1]->[10,1]->[11,1]->[12,2] ||(freelist)->[2,3]
+		mal.free(7);  // (usedList)->[1,1]->[5,2]->[9,1]->[10,1]->[11,1]->[12,2] ||(freelist)->[2,3]->[7,2]
+		mal.free(10); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[12,2] ||(freelist)->[2,3]->[7,2]->[10,1]
+		mal.free(12); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]-> ||(freelist)->[2,3]->[7,2]->[10,1]->[12,2]
+		assert(mal.size() == 8);//(freelist)->[2,3]->[7,2]->[10,1]->[12,2] total free bytes is 8
+		assert(mal.max_size() == 3);//(freelist)->[2,3]->[7,2]->[10,1]->[12,2] largest free block is 3 bytes
 		return mal;
 	}
 	@Test
 	public void testFFAlloc() {
 		MyMemoryAllocation mal = prepHoles("FF");
-		assert(mal.alloc(1)==2);//assert that the first available alloc for 1 byte at index 2
-		assert(mal.alloc(2)==3);//assert that the first available alloc for 2 bytes at index 3.
-		assert(mal.alloc(2)==7);//assert that the first available alloc for 2 bytes at index 7
+		assert(mal.alloc(1)==2); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1] ||(freelist)->[3,2]->[7,2]->[10,1]->[12,2]
+		assert(mal.alloc(2)==3); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1]->[3,2] ||(freelist)->[7,2]->[10,1]->[12,2]
+		assert(mal.alloc(2)==7); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1]->[3,2]->[7,2] ||(freelist)->[10,1]->[12,2]
 		assert(mal.alloc(3)==0); //failed case ! fragments!
-		// assert that the first available alloc for 3 bytes is unavailable, mal.alloc(3) returns 0 for failed allocation, which equals the test case 0
+		// (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1]->[3,2]->[7,2] ||(freelist)->[10,1]->[12,2]
 	}
 	@Test
 	public void testBFAlloc() {
 		MyMemoryAllocation mal = prepHoles("BF");
-		assert(mal.alloc(1)==10);// first best fit for 1 byte is at index 10
-		assert(mal.alloc(2)==7);// first best fit for 2 bytes is at index 7
-		assert(mal.alloc(2)==12);//first best fit for 2 bytes is at index 12
-		assert(mal.alloc(3)==2); //success! less fragments! 
-		//first best fit is available at index 2 for 3 bytes, the largest available freespace
+		assert(mal.alloc(1)==10); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[10,1] ||(freelist)->[2,3]->[7,2]->[12,2]
+		assert(mal.alloc(2)==7); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[10,1]->[7,2] ||(freelist)->[2,3]->[12,2]
+		assert(mal.alloc(2)==12); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[10,1]->[7,2]->[12,2] ||(freelist)->[2,3]
+		assert(mal.alloc(3)==2); //success! less fragments!  
+		// (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[10,1]->[7,2]->[12,2]->[2,3] ||(freelist)->
+		
 	}
 	@Test
 	public void testNFAlloc() {
 		MyMemoryAllocation mal = prepHoles("NF");
-		assert(mal.alloc(1)==2);//first available alloc for 1 byte at index 2.
-		assert(mal.alloc(2)==7);//next available block starting at index 7, available for 2 byte alloc
-		assert(mal.alloc(2)==12);//next available block starting at 12 is available for 2 byte alloc
-		assert(mal.alloc(3)==0); //also failed case ! fragments! -> no available freespace for a 3 byte alloc
-		assert(mal.alloc(1)==3); //wrap around
+		assert(mal.alloc(1)==2); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1] ||(freelist)->[3,2]->[7,2]->[10,1]->[12,2]
+		assert(mal.alloc(2)==7); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1]->[7,2] ||(freelist)->[3,2]->[10,1]->[12,2]
+		assert(mal.alloc(2)==12); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1]->[7,2]->[12,2] ||(freelist)->[3,2]->[10,1]
+		assert(mal.alloc(3)==0); // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1]->[7,2]->[12,2] ||(freelist)->[3,2]->[10,1]->(counter here)
+		assert(mal.alloc(1)==3);  // (usedList)->[1,1]->[5,2]->[9,1]->[11,1]->[2,1]->[7,2]->[12,2]->[3,1] ||(freelist)->[4,1]->[10,1]
 		//next available space for 1 byte starting at index 3, algorithm circles back to search for spaces again.
 	}
 
@@ -75,10 +76,10 @@ public class MyMemoryAllocationTest {
 	public void testFree1() {
 		MyMemoryAllocation mal = prepHoles("FF");
 		mal.free(2);//check if there is an error message
-		//creates error message because cannot free at index 2, already free.
+		// (usedList)->[1,1]->[5,2]->[9,1]->[11,1]-> ||(freelist)->[2,3]->[7,2]->[10,1]->[12,2]
 		assert(errContent.toString().length() != 0);//assert that error occurs is true
-		mal.free(1); //free successfull.
-		assert(mal.alloc(4)==1);//true, index 1-4 is free for a 4 byte alloc
+		mal.free(1); //free successfull.// (usedList)->[5,2]->[9,1]->[11,1]-> ||(freelist)->[1,1]->[2,3]->[7,2]->[10,1]->[12,2]
+		assert(mal.alloc(4)==1); //free successfull.// (usedList)->[1,4]->[5,2]->[9,1]->[11,1] ||(freelist)->[7,2]->[10,1]->[12,2]
 	}
 	@After
 	public void restoreStreams() {
@@ -88,9 +89,9 @@ public class MyMemoryAllocationTest {
 	@Test
 	public void testFree2() {
 		MyMemoryAllocation mal = prepHoles("FF");
-		mal.free(9);//free 1 byte at index 9
-		mal.free(5);//free 2 bytes from index 5 to 6
-		assert(mal.max_size() == 9);//true, index 2 to 10 free, largest available free space is 9 bytes
+		mal.free(9); // (usedList)->[1,1]->[5,2]->[11,1]-> ||(freelist)->[2,3]->[7,4]->[12,2]
+		mal.free(5); // (usedList)->[1,1]->[11,1]-> ||(freelist)->[2,9]->[12,2]
+		assert(mal.max_size() == 9); // (usedList)->[1,1]->[11,1]-> ||(freelist)->[2,9]->[12,2]
 	}
 	
 	@Test
