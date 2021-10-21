@@ -26,7 +26,7 @@ public class MyMemoryAllocation extends MemoryAllocation {
 
 	@Override
 	public void free(int addr) {
-		return freeBlocks.insertList(addr);
+		freeBlocks.insertList(addr, usedBlocks.removeByOffset(addr));
 	}
 
 

@@ -17,8 +17,6 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         this.front = front;
     }
 
-    public void splitMayDelete() {  }
-
     //Inserts the allocated offset and size into LinkedList
     public void insertList(int offset, int size) {
         Block finger = new Block(offset, size), newNode = front;
@@ -50,13 +48,15 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         return count;
     }
 
-    public void removeByOffset(int offset) {
+    public int removeByOffset(int offset) {
         MyLinkedList L = new MyLinkedList(front);
         Iterator it = L.iterator();
+        int removedSize = 0;
         if (offset < 0) {
             throw new IndexOutOfBoundsException("Out of Bound");
         }
         else if(offset == 1){
+        	removedSize = front.allosize;
             front = front.next;
         }
         else{
@@ -64,6 +64,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
             boolean success = false;
             while (it.hasNext()) {
             	if (finger.next.offset == offset) {
+            		removedSize = finger.next.allosize;
             		finger.next = finger.next.next;
             		success = true;
             		break;
@@ -71,9 +72,10 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
             	finger = (Block) it.next();
             }
             if (success == false) {
-            	throw new java.lang.RuntimeException("Specified offset no present");
+            	throw new java.lang.RuntimeException("Specified offset not present");
             }
         }
+        return removedSize;
     }
 
     private int detectCycles() {
