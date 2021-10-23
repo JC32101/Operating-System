@@ -1,4 +1,4 @@
-package Task2;
+package task3;
 
 import java.util.Iterator;
 
@@ -6,31 +6,14 @@ import java.util.Iterator;
 class MyLinkedList implements Iterable { //generic types are not required, you can just do Task2.MyLinkedList for blocks but Iterable is mandatory.
     //in addition to other regular list member functions such as insert and delete: (split and consolidate blocks must be implemented at the level of linked list)
 
-    public MyListNode front;
-
-    private static class MyListNode{
-        int offset;
-        int allosize;
-        MyListNode next;
-
-        MyListNode(int offset, int size){
-            this.offset = offset;
-            this.allosize = size;
-        }
-
-        MyListNode(int offset, int size, MyListNode next){
-            this.offset = offset;
-            this.allosize = size;
-            this.next = next;
-        }
-    }
+    public Block front;
 
     public MyLinkedList(){
         //Empty LinkedList
     }
 
     //Returns a new LinkedList with the given ListNode
-    private MyLinkedList(MyListNode front) {
+    private MyLinkedList(Block front) {
         this.front = front;
     }
 
@@ -38,24 +21,30 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
 
     //Inserts the allocated offset and size into LinkedList
     public void insertList(int offset, int size) {
-        MyListNode finger = new MyListNode(offset, size), newNode = front;
+        Block finger = new Block(offset, size), newNode = front;
+        Iterator it = this.iterator();
         if (front == null){
             front = finger;
         }
         else{
-            while (newNode.next != null){
-                newNode = newNode.next;
+            while (it.hasNext() == true && finger.offset > newNode.next.offset){
+                newNode = (Block) it.next();
             }
-            newNode.next = finger;
+            if (newNode.next == null) {
+                newNode.next = finger;
+            } else if (finger.offset < newNode.next.offset) {
+                finger.next = newNode.next;
+                newNode.next = finger;
+            }
         }
     }
 
-    //Returns list of size
+    //Returns total amount of collective allosize for each node
     public int size (){
-        MyListNode finger = front;
+        Block finger = front;
         int count = 0;
         while (finger != null){
-            count++;
+            count += finger.size;
             finger = finger.next;
         }
         return count;
@@ -65,21 +54,27 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
     public void removeByOffset(int offset) {
         // TODO: your code here
         MyLinkedList L = new MyLinkedList(front);
-        if (offset < 0 || offset > L.size()-1){
+        Iterator it = L.iterator();
+        if(offset < 0){
             throw new IndexOutOfBoundsException("Out of Bound");
         }
-        else if(offset == 0){
+        else if(offset == 1){
             front = front.next;
         }
         else{
-            MyListNode finger = front;
-            for(int i = 0; i < offset; i++){
-                if (i == offset-1){
+            Block finger = front;
+            boolean success = false;
+            while (it.hasNext()){
+                if(finger.next.offset == offset){
                     finger.next = finger.next.next;
+                    success = true;
+                    break;
                 }
-                else{
-                    finger = finger.next;
-                }
+                finger = (Block) it.next();
+            }
+
+            if(success == false){
+                throw new java.lang.RuntimeException("Specified offset no present");
             }
         }
     }
@@ -88,8 +83,8 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         if (front == null) {
             return 0;
         }
-        MyListNode tortoise = front;
-        MyListNode hare = front;
+        Block tortoise = front;
+        Block hare = front;
         int position = 0;
         while (true) {
             position += 1;
@@ -114,9 +109,9 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         }
         int cycleLocation = detectCycles();
         int position = 0;
-        String result = "(" + front.offset + " " + front.allosize;
-        for (MyListNode p = front.next; p != null; p = p.next) {
-            result += ", " + p.offset + " " + p.allosize;
+        String result = "(" + front.offset + " " + front.size;
+        for (Block p = front.next; p != null; p = p.next) {
+            result += ", " + p.offset + " " + p.size;
             position += 1;
             if (cycleLocation > 0 && position > cycleLocation) {
                 result += "... cycle exists ...";
@@ -129,6 +124,22 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
 
     @Override
     public Iterator iterator() {
-        return null;
+        return new Iterator() {
+            private Block currentBlock = front;
+            @Override
+            public boolean hasNext() {
+                return (currentBlock.next != null);
+            }
+
+            @Override
+            public Block next() {
+                currentBlock = currentBlock.next;
+                return currentBlock;
+            }
+
+            public void reset(){
+                currentBlock = front;
+            }
+        };
     }
 }
