@@ -27,7 +27,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
             front = finger;
         }
         else{
-            while (it.hasNext() == true && finger.offset > newNode.next.offset){
+            while (it.hasNext() && finger.offset > newNode.next.offset){
                 newNode = (Block) it.next();
             }
             if (newNode.next == null) {
