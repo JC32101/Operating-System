@@ -1,29 +1,39 @@
-public class MyLinkedList {
-    //attributes
-    int offset;
-    int size;
-    ////////////
+package task3;
 
-    void insert()
-    {
+public class MyLinkedList{
 
-    }
-    void delete()
-    {
+    private Block head;
+
+    public MyLinkedList() {
 
     }
-    void splitMayDelete()
-    {
-
+    //for prep?
+    public void insert(int offset, int size) {
+        Block newBlock = new Block(offset, size);// fix this
+        if (this.head == null) {
+            head = newBlock;
+        } else {
+            Block currentBlock = head;
+            for(int i = 0; i < offset - 1; i++){
+                currentBlock = currentBlock.getNextBlock();
+            }
+            newBlock.setNextBlock(currentBlock.getNextBlock());
+            currentBlock.setNextBlock(newBlock);
+        }
     }
-    void insertMayDelete()
-    {
 
-    }
-    String toString()
-    {
-        
+
+    void delete(int offset) {
+        Block currentBlock = head;
+        for(int i = 0; i < offset - 1; i++){
+            currentBlock = currentBlock.getNextBlock()
+        }
+        currentBlock.setNextBlock(currentBlock.getNextBlock().getNextBlock());
     }
 
+
+    public String toString() {
+        return null;
+    }
 
 }

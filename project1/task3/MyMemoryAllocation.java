@@ -1,3 +1,5 @@
+package task3;
+
 public class MyMemoryAllocation {
     
     int alloc(int size)
@@ -5,6 +7,7 @@ public class MyMemoryAllocation {
         //allocates momory with specified size
         //if mem available, allocate and return offset
         //if failed, return 0
+        return 0;
     }
     void free(int addr)
     {
@@ -16,12 +19,12 @@ public class MyMemoryAllocation {
     int size()
     {
         //returns the total size of available memory, it is the sum of all available blocks of memory. 
-
+        return 0;
     }
     int max_size()
     {
        // returns the size of the biggest available block of memory. It is the biggest size that can be allocated.
-
+        return 0;
     }
     void print()
     {
