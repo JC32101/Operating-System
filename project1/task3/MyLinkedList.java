@@ -18,6 +18,19 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
     }
 
     public void splitMayDelete() {  }
+    
+    public void merge(){
+        Block finger = front;
+        Iterator it = this.iterator();
+        
+        while (it.hasNext()){
+            int num = finger.offset + finger.size;
+            if((finger.next.offset-num) == 0){
+                finger.size = finger.size + finger.next.size;
+                removeByOffset(finger.next.offset);
+            }
+        }
+    }
 
     //Inserts the allocated offset and size into LinkedList
     public void insertList(int offset, int size) {
