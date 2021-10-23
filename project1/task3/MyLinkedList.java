@@ -25,7 +25,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         Iterator it = this.iterator();
         
         while (it.hasNext()){
-            int num = finger.offset + finger.size;
+            int num = finger.offset + finger.size-1;
             
             if((finger.next.offset-num) == 0){
                 finger.size = finger.size + finger.next.size;
