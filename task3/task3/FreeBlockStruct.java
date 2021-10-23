@@ -6,7 +6,7 @@ public class FreeBlockStruct extends MyLinkedList {
 	
 	private AllocMethod algorithm;
 	
-	public FreeBlockStruct(String algorithm, int mem_size) {
+	public FreeBlockStruct(int mem_size, String algorithm) {
 		
 		front = new Block(1, mem_size);
 		if (algorithm == "FF") {
@@ -50,4 +50,35 @@ public class FreeBlockStruct extends MyLinkedList {
             }
         }
 	}
-}
+	//this isn't working, need to have different cases for if we need to split up a block before we allocate
+//	public void allocMem(int offset, int size) {
+//		Block current = front;
+//		if (front.next == null) { //only one free block is present - could mean that entire memory is full
+//			current.allosize -= size;
+//			current.offset += size;
+//			System.out.println(this.toString());
+//			if (current.allosize == 0) { //signifies that the final block has been used and memory is full
+//				front = null;
+//			}
+//		} else {
+//			while (current.next != null && current.next.offset > offset) {
+//				current = current.next;
+//				}
+//			if (current.offset == offset) {
+//				current.allosize -= size;
+//				current.offset += size;
+//				if (current.allosize == 0) {
+//					current.next = current.next.next;
+//				}
+//			} else if (current.next.offset > offset) {
+//				current.allosize 
+//			}
+//			current.next.allosize -= size;
+//			current.next.offset += size;
+//			if (current.allosize == 0) {
+//				current.next = current.next.next;
+//			}
+//			System.out.println(this.toString());
+//		}
+//	}
+//}
