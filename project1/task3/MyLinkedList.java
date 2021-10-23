@@ -19,16 +19,20 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
 
     public void splitMayDelete() {  }
     
+    //Merges blocks together
     public void merge(){
         Block finger = front;
         Iterator it = this.iterator();
         
         while (it.hasNext()){
             int num = finger.offset + finger.size;
+            
             if((finger.next.offset-num) == 0){
                 finger.size = finger.size + finger.next.size;
-                removeByOffset(finger.next.offset);
+                finger.next = finger.next.next;
             }
+            
+            finger = (Block) it.next();
         }
     }
 
