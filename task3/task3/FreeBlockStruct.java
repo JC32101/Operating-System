@@ -4,18 +4,9 @@ import java.util.Iterator;
 
 public class FreeBlockStruct extends MyLinkedList {
 	
-	private AllocMethod algorithm;
-	
-	public FreeBlockStruct(int mem_size, String algorithm) {
+	public FreeBlockStruct(int mem_size) {
 		
 		front = new Block(1, mem_size);
-		if (algorithm == "FF") {
-			this.algorithm = new FirstFit();
-		} else if (algorithm == "NF") {
-			this.algorithm = new NextFit();
-		} else {
-			this.algorithm = new BestFit(); //will use Best Fit be default
-		}
 		
 	}
 

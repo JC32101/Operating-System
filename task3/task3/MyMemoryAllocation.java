@@ -12,7 +12,7 @@ class MyMemoryAllocation extends MemoryAllocation {
 
     public MyMemoryAllocation(int size, String algo) {
         super(size, algo);
-        free_list = new FreeBlockStruct(size, algo);
+        free_list = new FreeBlockStruct(size);
         used_list = new MyLinkedList();
     }
 
@@ -25,25 +25,17 @@ class MyMemoryAllocation extends MemoryAllocation {
     }
 
     public int alloc(int size) {
-        if(used_list.front == null){
-        	free_list.allocMem(1, size);
-            used_list.insertList(1, size);
-            return 0;
-        }
-        else{
-            Block finger = free_list.front;
-            Iterator it = free_list.iterator();
-            int address = 0;
-
-            while (it.hasNext()){
-                if(finger.allosize >= size){
-                	free_list.allocMem(finger.offset, size);
-                    used_list.insertList(finger.offset, size);
-                }
-                finger = (Block) it.next();
-            }
-            return finger.offset;
-        }
+    	int offsetToAlloc = 0;
+        if (algorithm == "FF") {
+    	   offsetToAlloc = firstFit(size);
+       } 
+//       else if (algorithm == "NF") {
+//    	   offsetToAlloc = nextFit(size);
+//       } else {
+//    	   offsetToAlloc = bestFit(size);
+//       }
+       free_list.splitMayDelete(offsetToAlloc, size);
+       used_list.insertList(offsetToAlloc, size);
     }
 
     public void free(int address) {
@@ -83,5 +75,24 @@ class MyMemoryAllocation extends MemoryAllocation {
             finger = (Block) it.next();
         }
         return max;
+    }
+    
+    public int firstFit(int size) {
+    	if(used_list.front == null){
+        	return 1;
+        }
+        else{
+            Block finger = free_list.front;
+            Iterator it = free_list.iterator();
+            int address = 0;
+
+            while (it.hasNext()){
+                if(finger.allosize >= size){
+                	return finger.offset;
+                }
+                finger = (Block) it.next();
+            }
+           return 0;
+        }
     }
 }
