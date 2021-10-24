@@ -21,11 +21,16 @@ class Block {
 
     public String toString() // highly recommended
     {
-        return null;
+        return "Offset: " + offset + "\nSize: " + size;
     }
 
     public boolean is_adjacent(Block other) {
-        return false;
+        if((offset == other.offset) && (size == other.size)){
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
 
