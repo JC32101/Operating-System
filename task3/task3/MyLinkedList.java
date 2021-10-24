@@ -67,9 +67,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         return count;
     }
 
-    //Removes the List that contains the Offset
-    public void removeByOffset(int offset) {
-        // TODO: your code here
+    public int removeByOffset(int offset) {
         MyLinkedList L = new MyLinkedList(front);
         Iterator it = L.iterator();
         if(offset < 0){
@@ -94,6 +92,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
                 throw new java.lang.RuntimeException("Specified offset no present");
             }
         }
+        return removedSize;
     }
 
     private int detectCycles() {
