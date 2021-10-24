@@ -12,8 +12,9 @@ class MyMemoryAllocation extends MemoryAllocation {
 
     public MyMemoryAllocation(int size, String algo) {
         super(size, algo);
-        free_list = new FreeBlockStruct(size);
+        free_list = new FreeBlockStruct(size-1);
         used_list = new MyLinkedList();
+        algorithm = algo;
     }
 
     // Strongly recommend you start with printing out the pieces.
@@ -25,6 +26,7 @@ class MyMemoryAllocation extends MemoryAllocation {
     }
 
     public int alloc(int size) {
+    	System.out.println(free_list);
     	int offsetToAlloc = 0;
         if (algorithm == "FF") {
     	   offsetToAlloc = firstFit(size);
@@ -42,24 +44,28 @@ class MyMemoryAllocation extends MemoryAllocation {
     public void free(int address) {
         Block finger = used_list.front;
         Iterator it = used_list.iterator();
-
-        while(it.hasNext()){
+        if(address == finger.offset){
+            free_list.insertList(address, used_list.removeByOffset(address)); //removeByOffset returns the size of the block removed
+            return;
+        } 
+        do{
+        	finger = (Block) it.next();
             if(address == finger.offset){
                 free_list.insertList(address, used_list.removeByOffset(address)); //removeByOffset returns the size of the block removed
+                free_list.merge();
                 return;
-            }
-            finger = (Block) it.next();
-        }
+            } 
+        } while (it.hasNext());
     }
 
     public int size() {
         Block finger = free_list.front;
         Iterator it = free_list.iterator();
-        int sum = 0;
-
+        int sum = finger.allosize;
+        
         while(it.hasNext()){
+        	finger = (Block) it.next();
             sum += finger.allosize;
-            finger = (Block) it.next();
         }
         return sum;
     }
@@ -87,12 +93,12 @@ class MyMemoryAllocation extends MemoryAllocation {
             Iterator it = free_list.iterator();
             int address = 0;
 
-            while (it.hasNext()){
+            do {
                 if(finger.allosize >= size){
                 	return finger.offset;
                 }
                 finger = (Block) it.next();
-            }
+            } while (it.hasNext());
            return 0;
         }
     }
