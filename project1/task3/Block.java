@@ -43,4 +43,35 @@ class Block {
     public boolean is_adjacent(Block isAdj) {
         return false;
     }
+
+    class Block {
+        int data;
+        Block next;
+        public Block(int data, Block next)
+        {
+            this.data = data;
+            this.next = next;
+        }
+          
+        // Setter getter methods for Data and Next Pointer
+        public void setData(int data)
+        {
+            this.data = data;
+        }
+          
+        public void setNext(Block next)
+        {
+            this.next = next;
+        }
+          
+        public int getData()
+        {
+            return data;
+        }
+          
+        public Block getNext()
+        {
+            return next;
+        }
+    }
 }
