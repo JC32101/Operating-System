@@ -41,35 +41,30 @@ public class FreeBlockStruct extends MyLinkedList {
             }
         }
 	}
-	//this isn't working, need to have different cases for if we need to split up a block before we allocate
-//	public void allocMem(int offset, int size) {
-//		Block current = front;
-//		if (front.next == null) { //only one free block is present - could mean that entire memory is full
-//			current.allosize -= size;
-//			current.offset += size;
-//			System.out.println(this.toString());
-//			if (current.allosize == 0) { //signifies that the final block has been used and memory is full
-//				front = null;
-//			}
-//		} else {
-//			while (current.next != null && current.next.offset > offset) {
-//				current = current.next;
-//				}
-//			if (current.offset == offset) {
-//				current.allosize -= size;
-//				current.offset += size;
-//				if (current.allosize == 0) {
-//					current.next = current.next.next;
-//				}
-//			} else if (current.next.offset > offset) {
-//				current.allosize 
-//			}
-//			current.next.allosize -= size;
-//			current.next.offset += size;
-//			if (current.allosize == 0) {
-//				current.next = current.next.next;
-//			}
-//			System.out.println(this.toString());
-//		}
-//	}
+	public void splitMayDelete(int offset, int size) {
+		if (offset == 1) {
+			front.offset += size;
+			front.allosize =- size;
+		} else {
+			Block finger = front;
+			while (finger.next != null && finger.offset > offset) {
+				finger = finger.next;
+			}
+			if (finger.next != null) {
+				int splitBlockSize = finger.allosize;
+				finger.allosize =  offset - finger.offset;
+				if (offset + size !=  finger.next.offset) {
+					Block holder = finger.next;
+					finger.next = new Block(offset+size, holder.offset-offset+size);
+				}
+			} else if (finger.next == null){
+			int splitBlockSize = finger.allosize;
+			finger.allosize =  offset - finger.offset;
+			if (offset+size != splitBlockSize - finger.allosize) {
+				finger.next = new Block(offset+size, splitBlockSize-finger.allosize-size);
+			}
+		}
+	}
+	}
+}
 //}

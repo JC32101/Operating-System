@@ -36,6 +36,7 @@ class MyMemoryAllocation extends MemoryAllocation {
 //       }
        free_list.splitMayDelete(offsetToAlloc, size);
        used_list.insertList(offsetToAlloc, size);
+       return offsetToAlloc;
     }
 
     public void free(int address) {
