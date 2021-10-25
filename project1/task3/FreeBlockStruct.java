@@ -27,6 +27,7 @@ public class FreeBlockStruct extends MyLinkedList {
                 newNode.next = finger;
             }
         }
+        emptyBlockClean();
     }
 	
 	//Merges blocks together
@@ -52,7 +53,7 @@ public class FreeBlockStruct extends MyLinkedList {
 			front.allosize = front.allosize - size;
 		} else {
 			Block finger = front;
-			while (finger.next != null && finger.offset > offset) {
+			while (finger.next != null && finger.offset != offset) {
 				finger = finger.next;
 			}
 			if (finger.next == null){
@@ -62,17 +63,29 @@ public class FreeBlockStruct extends MyLinkedList {
 			} else if (finger.next != null) {
 				int splitBlockSize = finger.allosize;
 				finger.allosize =  finger.allosize-size;
-				if (finger.allosize == 0) {
-					finger.allosize = finger.next.allosize;
-					finger.offset = finger.next.offset;
-					finger.next = finger.next.next;
-				}
 				finger.offset += size;
-				if (offset + size !=  finger.next.offset) {
-					Block holder = finger.next;
-					finger.next = new Block(offset+size, holder.offset-offset+size);
 				}
 		}
+		emptyBlockClean();
+		
 	}
+	
+	public void emptyBlockClean() {
+		if (front == null || front.next == null) {
+			return;
+		}
+		Block finger = front;
+		do {
+			if (finger.allosize == 0) {
+				finger.allosize = finger.next.allosize;
+				finger.offset = finger.next.offset;
+				finger.next = finger.next.next;
+			}
+			finger = finger.next;
+			if (finger == null) {
+				return;
+			}
+		} while (finger.next != null); 
 	}
+	
 }

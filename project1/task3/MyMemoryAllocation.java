@@ -19,14 +19,12 @@ class MyMemoryAllocation extends MemoryAllocation {
 
     // Strongly recommend you start with printing out the pieces.
     public void print() {
-        System.out.println("Free List: ");
-        free_list.toString();
-        System.out.println("Used List: ");
+        System.out.println("Free List: " + free_list.toString());
+        System.out.println("Used List: " + used_list.toString());
         used_list.toString();
     }
 
     public int alloc(int size) {
-    	System.out.println(free_list);
     	int offsetToAlloc = 0;
         if (algorithm == "FF") {
     	   offsetToAlloc = firstFit(size);
@@ -75,6 +73,9 @@ class MyMemoryAllocation extends MemoryAllocation {
         Iterator it = free_list.iterator();
         int max = 0;
 
+        if (finger.next == null) {
+        	return finger.allosize;
+        }
         while(it.hasNext()){
             if(finger.allosize > max){
                 max = finger.allosize;
