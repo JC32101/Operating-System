@@ -5,28 +5,28 @@ import java.util.Comparator;
 
 class Block {
     int offset;
-    int size;
+    int allosize;
     Block next;
 
 
-    Block(int offset, int size){
+    Block(int offset, int allosize){
         this.offset = offset;
-        this.size = size;
+        this.allosize = allosize;
     }
 
-    Block(int offset, int size, Block next){
+    Block(int offset, int allosize, Block next){
         this.offset = offset;
-        this.size = size;
+        this.allosize = allosize;
         this.next = next;
     }
 
     public String toString() // highly recommended
     {
-        return "Offset: " + offset + "\nSize: " + size;
+        return "Offset: " + offset + "\nSize: " + allosize;
     }
 
     public boolean is_adjacent(Block other) {
-        if((offset == other.offset) && (size == other.size)){
+        if((offset == other.offset) && (allosize == other.allosize)){
             return true;
         }
         else {
