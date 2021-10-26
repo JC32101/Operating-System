@@ -1,10 +1,6 @@
-package task3;
-
 import java.util.Iterator;
 
-import javax.security.auth.kerberos.DelegationPermission;
-
-public class FreeBlockStruct extends MyLinkedList {
+class FreeBlockStruct extends MyLinkedList {
   public FreeBlockStruct(int size) {
 
     head = new Block(1, size);

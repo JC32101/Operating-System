@@ -1,18 +1,14 @@
-package task3;
-
-import task3.MemoryAllocation;
-
 import java.util.Iterator;
 
 // I would like a simulation class to do most of the work.
 class MyMemoryAllocation extends MemoryAllocation {
-    String algorithm; //best fit, first fit or next fit
+    String algorithm; // best fit, first fit or next fit
     FreeBlockStruct free_list;
     MyLinkedList used_list;
 
     public MyMemoryAllocation(int size, String algo) {
         super(size, algo);
-        free_list = new FreeBlockStruct(size-1);
+        free_list = new FreeBlockStruct(size - 1);
         used_list = new MyLinkedList();
         algorithm = algo;
     }
@@ -27,10 +23,10 @@ class MyMemoryAllocation extends MemoryAllocation {
         int offsetToAlloc = 0;
         if (algorithm == "FF") {
             offsetToAlloc = firstFit(size);
-        }else if(algorithm == "BF"){
-
-        }else if(algorithm == "NF"){
-
+        } else if (algorithm == "BF") {
+            offsetToAlloc = bestFit(size);
+        } else if (algorithm == "NF") {
+            offsetToAlloc = nextFit(size);
         }
         free_list.splitMayDelete(offsetToAlloc, size);
         used_list.insertMayCompact(offsetToAlloc, size);
@@ -42,7 +38,8 @@ class MyMemoryAllocation extends MemoryAllocation {
         Iterator it = used_list.iterator();
         do {
             if (offset == freePoint.offset) {
-                free_list.insertMayCompact(offset, used_list.splitMayDelete(offset)); // removeByOffset returns the size of // the block removed
+                free_list.insertMayCompact(offset, used_list.splitMayDelete(offset)); // removeByOffset returns the size
+                                                                                      // of // the block removed
                 return;
             }
             freePoint = (Block) it.next();
@@ -94,5 +91,29 @@ class MyMemoryAllocation extends MemoryAllocation {
             } while (it.hasNext());
             return 0;
         }
+    }
+
+    public int bestFit(int size) {
+        if (used_list.head == null) {
+            return 1;
+        }
+        Block fitFinder = free_list.head;
+        Iterator it = free_list.iterator();
+        int offset = 0;
+        int sizeFit = size;
+        do {
+            if ((fitFinder.size - size >= 0) && (fitFinder.size - size < sizeFit)) {
+                sizeFit = fitFinder.size - size;
+                offset = fitFinder.offset;
+            }
+        } while (it.hasNext());
+        return offset;
+    }
+
+    public int nextFit(int size) {
+        if (used_list.head == null) {
+            return 1;
+        }
+        return 1;
     }
 }

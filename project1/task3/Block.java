@@ -1,6 +1,3 @@
-package task3;
-//fix visibility
-
 class Block {
   int offset;
   int size;

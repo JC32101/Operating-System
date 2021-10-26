@@ -1,8 +1,5 @@
-package task3;
-
 import java.util.Iterator;
 
-// Custom Linked List class using Generics
 class MyLinkedList implements Iterable {
 
   Block head;
