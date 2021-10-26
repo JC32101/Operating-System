@@ -1,10 +1,8 @@
-package task3;
+class BestFit extends AllocMethod {
 
-public class BestFit extends AllocMethod{
+	public int locateFit() {
 
-public int locateFit() {
-		
 		return 0;
 	}
-	
+
 }

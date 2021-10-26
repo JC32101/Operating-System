@@ -1,7 +1,3 @@
-package task3;
-
-import task3.MemoryAllocation;
-
 import java.util.Iterator;
 
 // I would like a simulation class to do most of the work.
@@ -52,7 +48,6 @@ class MyMemoryAllocation extends MemoryAllocation {
         	finger = (Block) it.next();
             if(address == finger.offset){
                 free_list.insertList(address, used_list.removeByOffset(address)); //removeByOffset returns the size of the block removed
-                free_list.merge();
                 return;
             } 
         } while (it.hasNext());

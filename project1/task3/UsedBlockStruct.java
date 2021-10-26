@@ -1,5 +1,3 @@
-package task3;
-
-public class UsedBlockStruct extends MyLinkedList {
+class UsedBlockStruct extends MyLinkedList {
 
 }

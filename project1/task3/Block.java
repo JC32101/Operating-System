@@ -1,6 +1,4 @@
-package task3;
-
-public class Block {
+class Block {
 
         int offset;
         int allosize;

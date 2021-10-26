@@ -1,6 +1,4 @@
-package task3;
-
-public class NextFit extends AllocMethod{
+class NextFit extends AllocMethod{
 
 public int locateFit() {
 		
