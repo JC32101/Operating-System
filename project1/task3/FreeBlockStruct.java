@@ -39,12 +39,12 @@ public class FreeBlockStruct extends MyLinkedList {
     }
   }
 
-  public void splitMayDelete(int size) {
+  public int splitMayDelete(int offset, int size) {
     Block extractionPoint = head;
     Iterator it = this.iterator();
 
     if (head == null) {
-      return; // or catch failed ??
+      return 0; // or catch failed ??
     }
     while(it.hasNext() == true && size > extractionPoint.nextBlock.size){
       extractionPoint = (Block) it.next();
@@ -58,8 +58,9 @@ public class FreeBlockStruct extends MyLinkedList {
       extractionPoint.nextBlock.offset += size;
       extractionPoint.nextBlock.size -= size;
     }else{
-      return; //error
+      return 0; //error
     }
+    return offset;
   }
 
   public void merge(Block one, Block two) {
