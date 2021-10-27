@@ -1,7 +1,3 @@
-package task3;
-
-import task3.MemoryAllocation;
-
 import java.util.Iterator;
 
 // I would like a simulation class to do most of the work.
