@@ -73,7 +73,8 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
             	finger = (Block) it.next();
             }
             if (success == false) {
-            	throw new java.lang.RuntimeException("Specified offset not present");
+            	System.out.println("nah nah nah");
+            	System.err.println("im so groovy");
             }
         }
         return removedSize;

@@ -11,24 +11,58 @@ public class FreeBlockStruct extends MyLinkedList {
 	}
 
 	public void insertList(int offset, int size) {
-        Block finger = new Block(offset, size), newNode = front;
+		Block newBlock = new Block(offset, size);
+        Block insertionPoint = front;
         Iterator it = this.iterator();
-        if (front == null){
-            front = finger;
-        }
-        else{
-            while (it.hasNext() && finger.offset > newNode.next.offset){
-                newNode = (Block) it.next();
+
+        if (front == null)
+          front = newBlock;
+        else {
+          while (it.hasNext() == true && newBlock.offset > insertionPoint.next.offset) {
+            insertionPoint = (Block) it.next();
+          }
+          if (insertionPoint.next == null) {
+            insertionPoint.next = newBlock;
+          } else if (newBlock.offset < insertionPoint.next.offset) {
+            if ((newBlock.offset + newBlock.allosize) == insertionPoint.next.offset) {
+              merge(newBlock, insertionPoint.next);
             }
-            if (newNode.next == null) {
-                newNode.next = finger;
-            } else if (finger.offset < newNode.next.offset) {
-                finger.next = newNode.next;
-                newNode.next = finger;
+            if ((insertionPoint.offset + insertionPoint.allosize) == newBlock.offset) {
+              merge(insertionPoint, newBlock);
+            } else {
+              newBlock.next = insertionPoint.next;
+              insertionPoint.next = newBlock;
             }
+          }
         }
-        emptyBlockClean();
-    }
+      }
+    
+    public void merge(Block one, Block two) {
+        one.allosize += two.allosize;
+        one.next = two.next;
+      }
+	
+//        Block finger = new Block(offset, size), newNode = front;
+//        Iterator it = this.iterator();
+//        if (front == null){
+//            front = finger;
+//        }
+//        else{
+//            while (it.hasNext() && finger.offset > newNode.next.offset){
+//                newNode = (Block) it.next();
+//            }
+//            if (newNode.next == null) {
+//                newNode.next = finger;
+//            } else if (finger.offset < newNode.next.offset) {
+//                finger.next = newNode.next;
+//                newNode.next = finger;
+//            }
+//        }
+//        emptyBlockClean();
+//    }
+	
+	
+	
 	
 	//Merges blocks together
     public void merge(){

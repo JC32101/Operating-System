@@ -45,14 +45,16 @@ class MyMemoryAllocation extends MemoryAllocation {
         if(address == finger.offset){
             free_list.insertList(address, used_list.removeByOffset(address)); //removeByOffset returns the size of the block removed
             return;
-        } 
+        } else if (finger.next == null) {
+        	return;
+        }
         do{
         	finger = (Block) it.next();
             if(address == finger.offset){
                 free_list.insertList(address, used_list.removeByOffset(address)); //removeByOffset returns the size of the block removed
-                free_list.merge();
                 return;
             } 
+            
         } while (it.hasNext());
     }
 
@@ -102,5 +104,22 @@ class MyMemoryAllocation extends MemoryAllocation {
             } while (it.hasNext());
            return 0;
         }
+    }
+    
+    public int bestFit(int size) {
+        if (used_list.front == null) {
+            return 1;
+        }
+        Block fitFinder = free_list.front;
+        Iterator it = free_list.iterator();
+        int offset = 0;
+        int sizeFit = size;
+        do {
+            if ((fitFinder.allosize - size >= 0) && (fitFinder.allosize - size < sizeFit)) {
+                sizeFit = fitFinder.allosize - size;
+                offset = fitFinder.offset;
+            }
+        } while (it.hasNext());
+        return offset;
     }
 }
