@@ -50,6 +50,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
     }
 
     public int removeByOffset(int offset) {
+    	System.out.println(offset + " dogs");
         MyLinkedList L = new MyLinkedList(front);
         Iterator it = L.iterator();
         int removedSize = 0;

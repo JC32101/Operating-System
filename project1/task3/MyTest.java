@@ -16,7 +16,6 @@ public class MyTest {
 		mal.free(7);
 		mal.free(10);
 		mal.free(12);
-		mal.print();
 		mal.free(2);
 		mal.print();
 	}

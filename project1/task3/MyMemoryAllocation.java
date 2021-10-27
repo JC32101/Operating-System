@@ -54,8 +54,9 @@ class MyMemoryAllocation extends MemoryAllocation {
                 free_list.insertList(address, used_list.removeByOffset(address)); //removeByOffset returns the size of the block removed
                 return;
             } 
-            
         } while (it.hasNext());
+        System.err.println("u r trash >:(");
+        
     }
 
     public int size() {

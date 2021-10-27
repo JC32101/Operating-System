@@ -100,7 +100,7 @@ public class FreeBlockStruct extends MyLinkedList {
 				finger.offset += size;
 				}
 		}
-		emptyBlockClean();
+		//emptyBlockClean();
 		
 	}
 	
