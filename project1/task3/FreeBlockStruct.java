@@ -1,6 +1,8 @@
+package task3;
+
 import java.util.Iterator;
 
-class FreeBlockStruct extends MyLinkedList {
+public class FreeBlockStruct extends MyLinkedList {
 	
 	public FreeBlockStruct(int mem_size) {
 		

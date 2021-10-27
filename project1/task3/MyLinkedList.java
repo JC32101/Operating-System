@@ -1,3 +1,6 @@
+
+package task3;
+
 import java.util.Iterator;
 
 // Probably a block class with at least these fields and methods.
