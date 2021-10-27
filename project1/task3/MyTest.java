@@ -16,8 +16,11 @@ public class MyTest {
 		mal.free(7);
 		mal.free(10);
 		mal.free(12);
-		mal.free(2);
+		mal.alloc(1);
 		mal.print();
+		mal.alloc(2);
+		mal.print();
+		mal.alloc(2);
 	}
 
 }
