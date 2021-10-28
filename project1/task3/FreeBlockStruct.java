@@ -1,123 +1,86 @@
 import java.util.Iterator;
 
 class FreeBlockStruct extends MyLinkedList {
-	
-	public FreeBlockStruct(int mem_size) {
-		
-		front = new Block(1, mem_size);
-		
-	}
 
-	public void insertList(int offset, int size) {
-		Block newBlock = new Block(offset, size);
-        Block insertionPoint = front;
-        Iterator it = this.iterator();
+    public FreeBlockStruct(int mem_size) {
 
-        if (front == null)
-          front = newBlock;
-        else {
-          while (it.hasNext() == true && newBlock.offset > insertionPoint.next.offset) {
-            insertionPoint = (Block) it.next();
-          }
-          if (insertionPoint.next == null) {
-            insertionPoint.next = newBlock;
-          } else if (newBlock.offset < insertionPoint.next.offset) {
-            if ((newBlock.offset + newBlock.allosize) == insertionPoint.next.offset) {
-              merge(newBlock, insertionPoint.next);
-            }
-            if ((insertionPoint.offset + insertionPoint.allosize) == newBlock.offset) {
-              merge(insertionPoint, newBlock);
-            } else {
-              newBlock.next = insertionPoint.next;
-              insertionPoint.next = newBlock;
-            }
-          }
-        }
-      }
-    
-    public void merge(Block one, Block two) {
-        one.allosize += two.allosize;
-        one.next = two.next;
-      }
-	
-//        Block finger = new Block(offset, size), newNode = front;
-//        Iterator it = this.iterator();
-//        if (front == null){
-//            front = finger;
-//        }
-//        else{
-//            while (it.hasNext() && finger.offset > newNode.next.offset){
-//                newNode = (Block) it.next();
-//            }
-//            if (newNode.next == null) {
-//                newNode.next = finger;
-//            } else if (finger.offset < newNode.next.offset) {
-//                finger.next = newNode.next;
-//                newNode.next = finger;
-//            }
-//        }
-//        emptyBlockClean();
-//    }
-	
-	
-	
-	
-	//Merges blocks together
-    public void merge(){
-        Block finger = front;
-        Iterator it = this.iterator();
-        
-        while (it.hasNext()){
-            int num = finger.offset + finger.allosize;
-            
-            if((finger.next.offset-num) == 0){
-                finger.allosize = finger.allosize + finger.next.allosize;
-                finger.next = finger.next.next;
-            }
-            
-            finger = (Block) it.next();
-        }
+        head = new Block(1, mem_size);
+
     }
-    
-	public void splitMayDelete(int offset, int size) {
-		if (offset == 1) {
-			front.offset += size;
-			front.allosize = front.allosize - size;
-		} else {
-			Block finger = front;
-			while (finger.next != null && finger.offset != offset) {
-				finger = finger.next;
-			}
-			if (finger.next == null){
-				int splitBlockSize = finger.allosize;
-				finger.offset = finger.offset + size;
-				finger.allosize = finger.allosize - size;
-			} else if (finger.next != null) {
-				int splitBlockSize = finger.allosize;
-				finger.allosize =  finger.allosize-size;
-				finger.offset += size;
-				}
-		}
-		//emptyBlockClean();
-		
-	}
-	
-	public void emptyBlockClean() {
-		if (front == null || front.next == null) {
-			return;
-		}
-		Block finger = front;
-		do {
-			if (finger.allosize == 0) {
-				finger.allosize = finger.next.allosize;
-				finger.offset = finger.next.offset;
-				finger.next = finger.next.next;
-			}
-			finger = finger.next;
-			if (finger == null) {
-				return;
-			}
-		} while (finger.next != null); 
-	}
-	
+
+    public Block splitMayDelete(Block blockToDelete) { //return int mem_size to free?
+        Block pointerBlock = head;
+        if (head == null || blockToDelete.offset < head.offset || blockToDelete.mem_size <= 0) {
+            System.out.println("u r trash >:( @ FBS Line 14 trying to delete " + blockToDelete.toString());
+            //Error cannot alloc 0 anything
+        }
+        int mem_size = 0;
+        if (blockToDelete.offset == head.offset) {
+            head.mem_size -= blockToDelete.mem_size;
+            head.offset += blockToDelete.mem_size;
+            if(head.mem_size == 0){
+                head = head.next;
+            }
+        } else {
+            Iterator it = this.iterator();
+            while (it.hasNext() == true && blockToDelete.offset > pointerBlock.next.offset) {
+                pointerBlock = (Block) it.next();
+            }
+            if (pointerBlock.next == null || (pointerBlock.offset < blockToDelete.offset && blockToDelete.offset < pointerBlock.next.offset)) {
+                System.out.println("u r trash >:( @ FBS Line 30 14 trying to delete " + blockToDelete.toString());
+                //Error cannot alloc 0 anything
+            } else if (blockToDelete.offset == pointerBlock.next.offset) {
+                pointerBlock.next.mem_size -= blockToDelete.mem_size;
+                pointerBlock.next.offset += blockToDelete.mem_size;
+                if(pointerBlock.next.mem_size == 0){
+                    pointerBlock.next = pointerBlock.next.next;
+                }
+            }
+        }return blockToDelete;
+    }
+
+    public void insertMayCompact(Block blockToInsert) {
+
+        if (blockToInsert.offset <= 0 || blockToInsert.mem_size <= 0) {
+            System.out.println("u r trash >:( trying to alloc " + blockToInsert.toString());
+        }
+        if (head == null) { //Head case
+            head = blockToInsert;
+            return;
+        }
+        Block pointerBlock = head;
+        Iterator it = this.iterator();
+        if (blockToInsert.offset < pointerBlock.offset) { //Head Case
+            blockToInsert.next = pointerBlock;
+            head = blockToInsert;
+            if(blockToInsert.offset + blockToInsert.mem_size == blockToInsert.next.offset){
+                merge(blockToInsert, blockToInsert.next);
+            }
+            return;
+        }
+        while (it.hasNext() == true && blockToInsert.offset > pointerBlock.next.offset) {
+            pointerBlock = (Block) it.next();
+        }
+        if (pointerBlock.next == null) {
+            pointerBlock.next = blockToInsert;
+            if(pointerBlock.offset + pointerBlock.mem_size == blockToInsert.offset){
+                merge(pointerBlock, blockToInsert);
+            }
+        } else {
+            blockToInsert.next = pointerBlock.next;
+            pointerBlock.next = blockToInsert;
+            if(blockToInsert.offset + blockToInsert.mem_size == blockToInsert.next.offset){
+                merge(blockToInsert, blockToInsert.next);
+            }
+            if(pointerBlock.offset + pointerBlock.mem_size == blockToInsert.offset){
+                merge(pointerBlock, blockToInsert);
+            }
+        }
+        return;
+    }
+
+    public void merge(Block one, Block two) {
+        one.mem_size += two.mem_size;
+        one.next = two.next;
+    }
 }
