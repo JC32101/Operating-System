@@ -110,11 +110,6 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
                 return currentBlock;
             }
 
-
-            public void reset() {
-                currentBlock = head;
-            }
-
         };
     }
 }
