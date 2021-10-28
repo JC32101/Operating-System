@@ -1,3 +1,0 @@
-class UsedBlockStruct extends MyLinkedList {
-
-}
