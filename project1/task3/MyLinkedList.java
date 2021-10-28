@@ -109,6 +109,9 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
                 currentBlock = currentBlock.next;
                 return currentBlock;
             }
+            public Block getCurrentBlock(){
+                return currentBlock;
+            }
 
         };
     }

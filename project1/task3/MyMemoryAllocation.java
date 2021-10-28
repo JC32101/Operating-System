@@ -5,7 +5,6 @@ class MyMemoryAllocation extends MemoryAllocation {
     String algorithm; //best fit, first fit or next fit
     FreeBlockStruct free_list;
     MyLinkedList used_list;
-    Iterator NF;
     Block globalPointer;
 
     public MyMemoryAllocation(int size, String algo) {
@@ -13,7 +12,6 @@ class MyMemoryAllocation extends MemoryAllocation {
         free_list = new FreeBlockStruct(size - 1);
         used_list = new MyLinkedList();
         algorithm = algo;
-        Iterator NF = free_list.iterator();
         globalPointer = free_list.head;
     }
 
@@ -33,6 +31,9 @@ class MyMemoryAllocation extends MemoryAllocation {
             offsetToAlloc = bestFit(mem_size);
         }
         Block tempBlock = new Block(offsetToAlloc, mem_size);
+        if(offsetToAlloc == 0){
+            return 0; //can't allocate, no place given
+        }
         free_list.splitMayDelete(tempBlock);
         used_list.insertSort(tempBlock);
         return offsetToAlloc;
@@ -99,11 +100,11 @@ class MyMemoryAllocation extends MemoryAllocation {
         int math_size = size;
         Iterator it = free_list.iterator();
         for (Block pointerBlock = free_list.head; pointerBlock != null; pointerBlock = (Block) it.next()) {
-            if (Math.abs(pointerBlock.mem_size - size) < math_size) {
-                if (pointerBlock.mem_size - size == 0) {
+            if (pointerBlock.mem_size >= size) {
+                if (pointerBlock.mem_size == size) {
                     return pointerBlock.offset;
                 }
-                math_size = Math.abs(pointerBlock.mem_size - size);
+                math_size = pointerBlock.mem_size - size;
                 offset = pointerBlock.offset;
             }
         }
@@ -111,17 +112,33 @@ class MyMemoryAllocation extends MemoryAllocation {
     }
 
     public int nextFit(int size) {
-        Iterator it = NF;
-        int address = 0;
-        for (Block pointerBlock = globalPointer; pointerBlock != null; pointerBlock = (Block) it.next()) {
-            if (pointerBlock.mem_size >= size) {
-                return pointerBlock.offset;
-            }
-            if (it.hasNext() == false) {
+        if (used_list.head == null) {
+            return 1;
+        } else {
+            if (globalPointer.next == null) {
                 globalPointer = free_list.head;
-                it = NF = free_list.iterator();
+            }
+            Iterator it = free_list.iterator();
+            while (globalPointer != free_list.head && (Block) it.next() != globalPointer) {
+                //lets play catch up
+            }
+            int address = 0;
+            while (true) {
+                if (globalPointer.mem_size >= size) {
+                    address = globalPointer.offset;
+                    if (globalPointer.next == null) {
+                        globalPointer = free_list.head;
+                    } else {
+                        globalPointer = (Block) it.next();
+                    }
+                    return address;
+                }
+                if (globalPointer.next == null) {
+                    return 0; // Alloc request too big, what do we do?
+                } else {
+                    globalPointer = (Block) it.next();
+                }
             }
         }
-        return 0;
     }
 }
