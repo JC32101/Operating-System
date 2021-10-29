@@ -12,7 +12,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         free_list = new FreeBlockStruct(size - 1);
         used_list = new MyLinkedList();
         algorithm = algo;
-        globalPointer = free_list.head;
+        globalPointer = free_list.getHead();
     }
 
     // Strongly recommend you start with printing out the pieces.
@@ -41,7 +41,7 @@ class MyMemoryAllocation extends MemoryAllocation {
 
     public void free(int offset) {
         Iterator it = used_list.iterator();
-        for (Block pointerBlock = used_list.head; pointerBlock != null; pointerBlock = (Block) it.next()) {
+        for (Block pointerBlock = used_list.getHead(); pointerBlock != null; pointerBlock = (Block) it.next()) {
             if (pointerBlock.offset == offset) {
                 free_list.insertMayCompact(used_list.delete(pointerBlock));
                 return;
@@ -52,7 +52,7 @@ class MyMemoryAllocation extends MemoryAllocation {
     }
 
     public int size() {
-        Block pointerBlock = free_list.head;
+        Block pointerBlock = free_list.getHead();
         Iterator it = free_list.iterator();
         int sum = pointerBlock.mem_size;
 
@@ -64,7 +64,7 @@ class MyMemoryAllocation extends MemoryAllocation {
     }
 
     public int max_size() {
-        Block pointerBlock = free_list.head;
+        Block pointerBlock = free_list.getHead();
         Iterator it = free_list.iterator();
         int max = 0;
 
@@ -86,7 +86,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         } else {
             Iterator it = free_list.iterator();
             int address = 0;
-            for (Block pointerBlock = free_list.head; pointerBlock != null; pointerBlock = (Block) it.next()) {
+            for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = (Block) it.next()) {
                 if (pointerBlock.mem_size >= size) {
                     return pointerBlock.offset;
                 }
@@ -99,7 +99,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         int offset = 0;
         int math_size = size;
         Iterator it = free_list.iterator();
-        for (Block pointerBlock = free_list.head; pointerBlock != null; pointerBlock = (Block) it.next()) {
+        for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = (Block) it.next()) {
             if (pointerBlock.mem_size >= size) {
                 if (pointerBlock.mem_size == size) {
                     return pointerBlock.offset;
@@ -116,10 +116,10 @@ class MyMemoryAllocation extends MemoryAllocation {
             return 1;
         } else {
             if (globalPointer.next == null) {
-                globalPointer = free_list.head;
+                globalPointer = free_list.getHead();
             }
             Iterator it = free_list.iterator();
-            while (globalPointer != free_list.head && (Block) it.next() != globalPointer) {
+            while (globalPointer != free_list.getHead() && (Block) it.next() != globalPointer) {
                 //lets play catch up
             }
             int address = 0;
@@ -127,7 +127,7 @@ class MyMemoryAllocation extends MemoryAllocation {
                 if (globalPointer.mem_size >= size) {
                     address = globalPointer.offset;
                     if (globalPointer.next == null) {
-                        globalPointer = free_list.head;
+                        globalPointer = free_list.getHead();
                     } else {
                         globalPointer = (Block) it.next();
                     }

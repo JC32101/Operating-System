@@ -4,16 +4,15 @@ import java.util.Iterator;
 class MyLinkedList implements Iterable { //generic types are not required, you can just do Task2.MyLinkedList for blocks but Iterable is mandatory.
     //in addition to other regular list member functions such as insert and delete: (split and consolidate blocks must be implemented at the level of linked list)
 
-    public Block head;
+    private Block head;
 
     //Empty LinkedList
     public MyLinkedList() {
         this.head = null;
     }
-
-    //Returns a new LinkedList with the given ListNode
-    private MyLinkedList(Block head) {
-        this.head = head;
+    
+    public MyLinkedList(int mem_size) {
+        head = new Block(1, mem_size);
     }
     
     public boolean isEmpty() {
@@ -22,6 +21,18 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
     	} else {
     		return false;
     	}
+    }
+    
+    public Block getHead() {
+    	return head;
+    }
+    
+    public void setHead(Block b) {
+    	head = b;
+    }
+    
+    public void removeHead() {
+    	head = head.next;
     }
 
     //Inserts the allocated offset and size into LinkedList

@@ -1,25 +1,23 @@
 import java.util.Iterator;
 
 class FreeBlockStruct extends MyLinkedList {
-
-    public FreeBlockStruct(int mem_size) {
-
-        head = new Block(1, mem_size);
-
-    }
-
+	
+	public FreeBlockStruct(int size) {
+		super(size);
+	}
+    
     public Block splitMayDelete(Block blockToDelete) { //return int mem_size to free?
-        Block pointerBlock = head;
-        if (head == null || blockToDelete.offset < head.offset || blockToDelete.mem_size <= 0) {
+        Block pointerBlock = getHead();
+        if (getHead() == null || blockToDelete.offset < getHead().offset || blockToDelete.mem_size <= 0) {
             System.out.println("u r trash >:( @ FBS Line 14 trying to delete " + blockToDelete.toString());
             //Error cannot alloc 0 anything
         }
         int mem_size = 0;
-        if (blockToDelete.offset == head.offset) {
-            head.mem_size -= blockToDelete.mem_size;
-            head.offset += blockToDelete.mem_size;
-            if(head.mem_size == 0){
-                head = head.next;
+        if (blockToDelete.offset == getHead().offset) {
+        	getHead().mem_size -= blockToDelete.mem_size;
+        	getHead().offset += blockToDelete.mem_size;
+            if(getHead().mem_size == 0){
+                removeHead();
             }
         } else {
             Iterator it = this.iterator();
@@ -44,15 +42,15 @@ class FreeBlockStruct extends MyLinkedList {
         if (blockToInsert.offset <= 0 || blockToInsert.mem_size <= 0) {
             System.out.println("u r trash >:( trying to alloc " + blockToInsert.toString());
         }
-        if (head == null) { //Head case
-            head = blockToInsert;
+        if (getHead() == null) { //Head case
+            setHead(blockToInsert);
             return;
         }
-        Block pointerBlock = head;
+        Block pointerBlock = getHead();
         Iterator it = this.iterator();
         if (blockToInsert.offset < pointerBlock.offset) { //Head Case
             blockToInsert.next = pointerBlock;
-            head = blockToInsert;
+            setHead(blockToInsert);
             if(blockToInsert.offset + blockToInsert.mem_size == blockToInsert.next.offset){
                 merge(blockToInsert, blockToInsert.next);
             }
