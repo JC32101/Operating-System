@@ -80,8 +80,8 @@ class MyMemoryAllocation extends MemoryAllocation {
         return max;
     }
 
-    public int firstFit(int size) {
-        if (used_list.head == null) {
+    private int firstFit(int size) {
+        if (used_list.isEmpty()) {
             return 1;
         } else {
             Iterator it = free_list.iterator();
@@ -95,7 +95,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         }
     }
 
-    public int bestFit(int size) {
+    private int bestFit(int size) {
         int offset = 0;
         int math_size = size;
         Iterator it = free_list.iterator();
@@ -111,8 +111,8 @@ class MyMemoryAllocation extends MemoryAllocation {
         return offset;
     }
 
-    public int nextFit(int size) {
-        if (used_list.head == null) {
+    private int nextFit(int size) {
+        if (used_list.isEmpty()) {
             return 1;
         } else {
             if (globalPointer.next == null) {

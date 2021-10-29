@@ -79,7 +79,7 @@ class FreeBlockStruct extends MyLinkedList {
         return;
     }
 
-    public void merge(Block one, Block two) {
+    private void merge(Block one, Block two) {
         one.mem_size += two.mem_size;
         one.next = two.next;
     }

@@ -15,6 +15,14 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
     private MyLinkedList(Block head) {
         this.head = head;
     }
+    
+    public boolean isEmpty() {
+    	if (head == null) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
 
     //Inserts the allocated offset and size into LinkedList
     public void insertSort(Block blockToInsert) {
@@ -95,24 +103,24 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         return string;
     }
 
-    @Override
-    public Iterator iterator() {
-        return new Iterator() {
-
-            private Block currentBlock = head;
-
-            public boolean hasNext() {
-                return (currentBlock.next != null);
-            }
-
-            public Block next() {
-                currentBlock = currentBlock.next;
-                return currentBlock;
-            }
-            public Block getCurrentBlock(){
-                return currentBlock;
-            }
-
-        };
+    public BlockIterator iterator() {
+    	return new BlockIterator();
     }
+    
+    private class BlockIterator implements Iterator  {
+    	private Block currentBlock = head;
+
+        public boolean hasNext() {
+            return (currentBlock.next != null);
+        }
+
+        public Block next() {
+            currentBlock = currentBlock.next;
+            return currentBlock;
+        }
+        public Block getCurrentBlock(){
+            return currentBlock;
+        }
+
+    };
 }
