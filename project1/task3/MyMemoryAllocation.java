@@ -41,13 +41,13 @@ class MyMemoryAllocation extends MemoryAllocation {
 
     public void free(int offset) {
         Iterator it = used_list.iterator();
-        for (Block pointerBlock = used_list.getHead(); pointerBlock != null; pointerBlock = (Block) it.next()) {
+        for (Block pointerBlock = used_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
             if (pointerBlock.offset == offset) {
                 free_list.insertMayCompact(used_list.delete(pointerBlock));
                 return;
             }
         }
-        System.err.println("u r trash >:(");
+        System.err.println("my day is ruined");
 
     }
 
@@ -57,7 +57,8 @@ class MyMemoryAllocation extends MemoryAllocation {
         int sum = pointerBlock.mem_size;
 
         while (it.hasNext()) {
-            pointerBlock = (Block) it.next();
+        	it.next();
+            pointerBlock = pointerBlock.next;
             sum += pointerBlock.mem_size;
         }
         return sum;
@@ -75,7 +76,8 @@ class MyMemoryAllocation extends MemoryAllocation {
             if (pointerBlock.mem_size > max) {
                 max = pointerBlock.mem_size;
             }
-            pointerBlock = (Block) it.next();
+            pointerBlock = pointerBlock.next;
+            it.next();
         }
         return max;
     }
@@ -86,7 +88,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         } else {
             Iterator it = free_list.iterator();
             int address = 0;
-            for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = (Block) it.next()) {
+            for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
                 if (pointerBlock.mem_size >= size) {
                     return pointerBlock.offset;
                 }
@@ -99,7 +101,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         int offset = 0;
         int math_size = size;
         Iterator it = free_list.iterator();
-        for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = (Block) it.next()) {
+        for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
             if (pointerBlock.mem_size >= size) {
                 if (pointerBlock.mem_size == size) {
                     return pointerBlock.offset;
@@ -119,8 +121,11 @@ class MyMemoryAllocation extends MemoryAllocation {
                 globalPointer = free_list.getHead();
             }
             Iterator it = free_list.iterator();
-            while (globalPointer != free_list.getHead() && (Block) it.next() != globalPointer) {
-                //lets play catch up
+            Block compBlock;
+            int offsetCompare = -1;
+            while (globalPointer != free_list.getHead() && offsetCompare != globalPointer.offset) {
+            	compBlock = (Block) it.next();
+            	offsetCompare = compBlock.offset;
             }
             int address = 0;
             while (true) {
@@ -129,14 +134,14 @@ class MyMemoryAllocation extends MemoryAllocation {
                     if (globalPointer.next == null) {
                         globalPointer = free_list.getHead();
                     } else {
-                        globalPointer = (Block) it.next();
+                        globalPointer = globalPointer.next;
                     }
                     return address;
                 }
                 if (globalPointer.next == null) {
                     return 0; // Alloc request too big, what do we do?
                 } else {
-                    globalPointer = (Block) it.next();
+                    globalPointer = globalPointer.next;
                 }
             }
         }

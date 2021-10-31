@@ -9,7 +9,7 @@ class FreeBlockStruct extends MyLinkedList {
     public Block splitMayDelete(Block blockToDelete) { //return int mem_size to free?
         Block pointerBlock = getHead();
         if (getHead() == null || blockToDelete.offset < getHead().offset || blockToDelete.mem_size <= 0) {
-            System.out.println("u r trash >:( @ FBS Line 14 trying to delete " + blockToDelete.toString());
+            System.out.println("u r trash >:( @ FBS Line 12 trying to delete " + blockToDelete.toString());
             //Error cannot alloc 0 anything
         }
         int mem_size = 0;
@@ -22,7 +22,7 @@ class FreeBlockStruct extends MyLinkedList {
         } else {
             Iterator it = this.iterator();
             while (it.hasNext() == true && blockToDelete.offset > pointerBlock.next.offset) {
-                pointerBlock = (Block) it.next();
+                pointerBlock = pointerBlock.next;
             }
             if (pointerBlock.next == null || (pointerBlock.offset < blockToDelete.offset && blockToDelete.offset < pointerBlock.next.offset)) {
                 System.out.println("u r trash >:( @ FBS Line 30 14 trying to delete " + blockToDelete.toString());
@@ -57,7 +57,8 @@ class FreeBlockStruct extends MyLinkedList {
             return;
         }
         while (it.hasNext() == true && blockToInsert.offset > pointerBlock.next.offset) {
-            pointerBlock = (Block) it.next();
+        	it.next();
+            pointerBlock = pointerBlock.next;
         }
         if (pointerBlock.next == null) {
             pointerBlock.next = blockToInsert;
