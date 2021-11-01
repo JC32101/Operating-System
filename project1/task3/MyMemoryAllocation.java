@@ -12,7 +12,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         free_list = new FreeBlockStruct(size - 1);
         used_list = new MyLinkedList();
         algorithm = algo;
-        globalPointer = free_list.head;
+        globalPointer = free_list.getHead();
     }
 
     // Strongly recommend you start with printing out the pieces.
@@ -41,102 +41,107 @@ class MyMemoryAllocation extends MemoryAllocation {
 
     public void free(int offset) {
         Iterator it = used_list.iterator();
-        for (Block pointerBlock = used_list.head; pointerBlock != null; pointerBlock = (Block) it.next()) {
-            if (pointerBlock.offset == offset) {
+        for (Block pointerBlock = used_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
+            if (pointerBlock.getOffset() == offset) {
                 free_list.insertMayCompact(used_list.delete(pointerBlock));
                 return;
             }
         }
-        System.err.println("u r trash >:(");
+        System.err.println("my day is ruined");
 
     }
 
     public int size() {
-        Block pointerBlock = free_list.head;
+        Block pointerBlock = free_list.getHead();
         Iterator it = free_list.iterator();
-        int sum = pointerBlock.mem_size;
+        int sum = pointerBlock.getMem_size();
 
         while (it.hasNext()) {
-            pointerBlock = (Block) it.next();
-            sum += pointerBlock.mem_size;
+        	it.next();
+            pointerBlock = pointerBlock.next;
+            sum += pointerBlock.getMem_size();
         }
         return sum;
     }
 
     public int max_size() {
-        Block pointerBlock = free_list.head;
+        Block pointerBlock = free_list.getHead();
         Iterator it = free_list.iterator();
         int max = 0;
 
         if (pointerBlock.next == null) {
-            return pointerBlock.mem_size;
+            return pointerBlock.getMem_size();
         }
         while (it.hasNext()) {
-            if (pointerBlock.mem_size > max) {
-                max = pointerBlock.mem_size;
+            if (pointerBlock.getMem_size() > max) {
+                max = pointerBlock.getMem_size();
             }
-            pointerBlock = (Block) it.next();
+            pointerBlock = pointerBlock.next;
+            it.next();
         }
         return max;
     }
 
-    public int firstFit(int size) {
-        if (used_list.head == null) {
+    private int firstFit(int size) {
+        if (used_list.isEmpty()) {
             return 1;
         } else {
             Iterator it = free_list.iterator();
             int address = 0;
-            for (Block pointerBlock = free_list.head; pointerBlock != null; pointerBlock = (Block) it.next()) {
-                if (pointerBlock.mem_size >= size) {
-                    return pointerBlock.offset;
+            for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
+                if (pointerBlock.getMem_size() >= size) {
+                    return pointerBlock.getOffset();
                 }
             }
             return 0;
         }
     }
 
-    public int bestFit(int size) {
+    private int bestFit(int size) {
         int offset = 0;
         int math_size = size;
         Iterator it = free_list.iterator();
-        for (Block pointerBlock = free_list.head; pointerBlock != null; pointerBlock = (Block) it.next()) {
-            if (pointerBlock.mem_size >= size) {
-                if (pointerBlock.mem_size == size) {
-                    return pointerBlock.offset;
+        for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
+            if (pointerBlock.getMem_size() >= size) {
+                if (pointerBlock.getMem_size() == size) {
+                    return pointerBlock.getOffset();
                 }
-                math_size = pointerBlock.mem_size - size;
-                offset = pointerBlock.offset;
+                math_size = pointerBlock.getMem_size() - size;
+                offset = pointerBlock.getOffset();
             }
         }
         return offset;
     }
 
-    public int nextFit(int size) {
-        if (used_list.head == null) {
+    private int nextFit(int size) {
+        if (used_list.isEmpty()) {
             return 1;
         } else {
             if (globalPointer.next == null) {
-                globalPointer = free_list.head;
+                globalPointer = free_list.getHead();
             }
             Iterator it = free_list.iterator();
-            while (globalPointer != free_list.head && (Block) it.next() != globalPointer) {
-                //lets play catch up
+            Block compBlock;
+            int offsetCompare = -1;
+            while (globalPointer != free_list.getHead() && offsetCompare != globalPointer.getOffset()) {
+            	compBlock = (Block) it.next();
+            	offsetCompare = compBlock.getOffset();
             }
             int address = 0;
             while (true) {
-                if (globalPointer.mem_size >= size) {
-                    address = globalPointer.offset;
+                if (globalPointer.getMem_size() >= size) {
+                    address = globalPointer.getOffset();
                     if (globalPointer.next == null) {
-                        globalPointer = free_list.head;
+                        globalPointer = free_list.getHead();
                     } else {
-                        globalPointer = (Block) it.next();
+                        globalPointer = globalPointer.next;
                     }
                     return address;
                 }
                 if (globalPointer.next == null) {
                     return 0; // Alloc request too big, what do we do?
                 } else {
-                    globalPointer = (Block) it.next();
+                    globalPointer = globalPointer.next;
                 }
             }
         }
