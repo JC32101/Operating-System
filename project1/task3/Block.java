@@ -1,7 +1,7 @@
 class Block {
 
-    int offset;
-    int mem_size;
+    private int offset;
+    private int mem_size;
     Block next;
 
     Block(int offset, int mem_size) {
@@ -15,15 +15,27 @@ class Block {
         this.next = next;
     }
 
-    public String toString(){
+    public String toString() {
         String string = "[" + this.offset + ", " + this.mem_size + "]->";
-        if(this.next == null){
+        if (this.next == null) {
             string += "null";
         }
         return string;
-    }; // highly recommended
+    }
 
-    //public boolean is_adjacent(Block other){};
+    public void setOffset(int offset){
+        this.offset = offset;
+    }
 
+    public void setMem_size(int size){
+        mem_size = size;
+    }
 
+    public int getOffset(){
+        return offset;
+    }
+
+    public int getMem_size(){
+        return mem_size;
+    }
 }
