@@ -2,7 +2,7 @@ class Block {
 
     private int offset;
     private int mem_size;
-    Block next;
+    private Block next;
 
     Block(int offset, int mem_size) {
         this.offset = offset;
@@ -31,11 +31,19 @@ class Block {
         mem_size = size;
     }
 
+    public void setNext(Block next) {
+        this.next = next;
+    }
+
     public int getOffset(){
         return offset;
     }
 
     public int getMem_size(){
         return mem_size;
+    }
+
+    public Block getNext() {
+        return next;
     }
 }
