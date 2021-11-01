@@ -41,7 +41,7 @@ class MyMemoryAllocation extends MemoryAllocation {
 
     public void free(int offset) {
         Iterator it = used_list.iterator();
-        for (Block pointerBlock = used_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
+        for (Block pointerBlock = used_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.getNext()) {
             if (pointerBlock.getOffset() == offset) {
                 free_list.insertMayCompact(used_list.delete(pointerBlock));
                 return;
@@ -58,7 +58,7 @@ class MyMemoryAllocation extends MemoryAllocation {
 
         while (it.hasNext()) {
         	it.next();
-            pointerBlock = pointerBlock.next;
+            pointerBlock = pointerBlock.getNext();
             sum += pointerBlock.getMem_size();
         }
         return sum;
@@ -69,14 +69,14 @@ class MyMemoryAllocation extends MemoryAllocation {
         Iterator it = free_list.iterator();
         int max = 0;
 
-        if (pointerBlock.next == null) {
+        if (pointerBlock.getNext() == null) {
             return pointerBlock.getMem_size();
         }
         while (it.hasNext()) {
             if (pointerBlock.getMem_size() > max) {
                 max = pointerBlock.getMem_size();
             }
-            pointerBlock = pointerBlock.next;
+            pointerBlock = pointerBlock.getNext();
             it.next();
         }
         return max;
@@ -88,7 +88,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         } else {
             Iterator it = free_list.iterator();
             int address = 0;
-            for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
+            for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.getNext()) {
                 if (pointerBlock.getMem_size() >= size) {
                     return pointerBlock.getOffset();
                 }
@@ -101,7 +101,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         int offset = 0;
         int math_size = size;
         Iterator it = free_list.iterator();
-        for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.next) {
+        for (Block pointerBlock = free_list.getHead(); pointerBlock != null; pointerBlock = pointerBlock.getNext()) {
             if (pointerBlock.getMem_size() >= size) {
                 if (pointerBlock.getMem_size() == size) {
                     return pointerBlock.getOffset();
@@ -117,7 +117,7 @@ class MyMemoryAllocation extends MemoryAllocation {
         if (used_list.isEmpty()) {
             return 1;
         } else {
-            if (globalPointer.next == null) {
+            if (globalPointer.getNext() == null) {
                 globalPointer = free_list.getHead();
             }
             Iterator it = free_list.iterator();
@@ -131,17 +131,17 @@ class MyMemoryAllocation extends MemoryAllocation {
             while (true) {
                 if (globalPointer.getMem_size() >= size) {
                     address = globalPointer.getOffset();
-                    if (globalPointer.next == null) {
+                    if (globalPointer.getNext() == null) {
                         globalPointer = free_list.getHead();
                     } else {
-                        globalPointer = globalPointer.next;
+                        globalPointer = globalPointer.getNext();
                     }
                     return address;
                 }
-                if (globalPointer.next == null) {
+                if (globalPointer.getNext() == null) {
                     return 0; // Alloc request too big, what do we do?
                 } else {
-                    globalPointer = globalPointer.next;
+                    globalPointer = globalPointer.getNext();
                 }
             }
         }
