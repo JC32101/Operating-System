@@ -1,38 +1,36 @@
 import java.util.Iterator;
 
 class FreeBlockStruct extends MyLinkedList {
-
-    public FreeBlockStruct(int mem_size) {
-
-        head = new Block(1, mem_size);
-
-    }
-
+	
+	public FreeBlockStruct(int size) {
+		super(size);
+	}
+    
     public Block splitMayDelete(Block blockToDelete) { //return int mem_size to free?
-        Block pointerBlock = head;
-        if (head == null || blockToDelete.offset < head.offset || blockToDelete.mem_size <= 0) {
-            System.out.println("u r trash >:( @ FBS Line 14 trying to delete " + blockToDelete.toString());
+        Block pointerBlock = getHead();
+        if (getHead() == null || blockToDelete.getOffset() < getHead().getOffset() || blockToDelete.getMem_size() <= 0) {
+            System.out.println("u r trash >:( @ FBS Line 12 trying to delete " + blockToDelete.toString());
             //Error cannot alloc 0 anything
         }
         int mem_size = 0;
-        if (blockToDelete.offset == head.offset) {
-            head.mem_size -= blockToDelete.mem_size;
-            head.offset += blockToDelete.mem_size;
-            if(head.mem_size == 0){
-                head = head.next;
+        if (blockToDelete.getOffset() == getHead().getOffset()) {
+        	getHead().setMem_size(getHead().getMem_size() - blockToDelete.getMem_size());
+        	getHead().setOffset(getHead().getOffset() + blockToDelete.getMem_size());
+            if(getHead().getMem_size() == 0){
+                removeHead();
             }
         } else {
             Iterator it = this.iterator();
-            while (it.hasNext() == true && blockToDelete.offset > pointerBlock.next.offset) {
-                pointerBlock = (Block) it.next();
+            while (it.hasNext() == true && blockToDelete.getOffset() > pointerBlock.next.getOffset()) {
+                pointerBlock = pointerBlock.next;
             }
-            if (pointerBlock.next == null || (pointerBlock.offset < blockToDelete.offset && blockToDelete.offset < pointerBlock.next.offset)) {
+            if (pointerBlock.next == null || (pointerBlock.getOffset() < blockToDelete.getOffset() && blockToDelete.getOffset() < pointerBlock.next.getOffset())) {
                 System.out.println("u r trash >:( @ FBS Line 30 14 trying to delete " + blockToDelete.toString());
                 //Error cannot alloc 0 anything
-            } else if (blockToDelete.offset == pointerBlock.next.offset) {
-                pointerBlock.next.mem_size -= blockToDelete.mem_size;
-                pointerBlock.next.offset += blockToDelete.mem_size;
-                if(pointerBlock.next.mem_size == 0){
+            } else if (blockToDelete.getOffset() == pointerBlock.next.getOffset()) {
+                pointerBlock.next.setMem_size(pointerBlock.next.getMem_size() - blockToDelete.getMem_size());
+                pointerBlock.next.setOffset(pointerBlock.next.getOffset() + blockToDelete.getMem_size());
+                if(pointerBlock.next.getMem_size() == 0){
                     pointerBlock.next = pointerBlock.next.next;
                 }
             }
@@ -41,46 +39,47 @@ class FreeBlockStruct extends MyLinkedList {
 
     public void insertMayCompact(Block blockToInsert) {
 
-        if (blockToInsert.offset <= 0 || blockToInsert.mem_size <= 0) {
+        if (blockToInsert.getOffset() <= 0 || blockToInsert.getMem_size() <= 0) {
             System.out.println("u r trash >:( trying to alloc " + blockToInsert.toString());
         }
-        if (head == null) { //Head case
-            head = blockToInsert;
+        if (getHead() == null) { //Head case
+            setHead(blockToInsert);
             return;
         }
-        Block pointerBlock = head;
+        Block pointerBlock = getHead();
         Iterator it = this.iterator();
-        if (blockToInsert.offset < pointerBlock.offset) { //Head Case
+        if (blockToInsert.getOffset() < pointerBlock.getOffset()) { //Head Case
             blockToInsert.next = pointerBlock;
-            head = blockToInsert;
-            if(blockToInsert.offset + blockToInsert.mem_size == blockToInsert.next.offset){
+            setHead(blockToInsert);
+            if(blockToInsert.getOffset() + blockToInsert.getMem_size() == blockToInsert.next.getOffset()){
                 merge(blockToInsert, blockToInsert.next);
             }
             return;
         }
-        while (it.hasNext() == true && blockToInsert.offset > pointerBlock.next.offset) {
-            pointerBlock = (Block) it.next();
+        while (it.hasNext() == true && blockToInsert.getOffset() > pointerBlock.next.getOffset()) {
+        	it.next();
+            pointerBlock = pointerBlock.next;
         }
         if (pointerBlock.next == null) {
             pointerBlock.next = blockToInsert;
-            if(pointerBlock.offset + pointerBlock.mem_size == blockToInsert.offset){
+            if(pointerBlock.getOffset() + pointerBlock.getMem_size() == blockToInsert.getOffset()){
                 merge(pointerBlock, blockToInsert);
             }
         } else {
             blockToInsert.next = pointerBlock.next;
             pointerBlock.next = blockToInsert;
-            if(blockToInsert.offset + blockToInsert.mem_size == blockToInsert.next.offset){
+            if(blockToInsert.getOffset() + blockToInsert.getMem_size() == blockToInsert.next.getOffset()){
                 merge(blockToInsert, blockToInsert.next);
             }
-            if(pointerBlock.offset + pointerBlock.mem_size == blockToInsert.offset){
+            if(pointerBlock.getOffset() + pointerBlock.getMem_size() == blockToInsert.getOffset()){
                 merge(pointerBlock, blockToInsert);
             }
         }
         return;
     }
 
-    public void merge(Block one, Block two) {
-        one.mem_size += two.mem_size;
+    private void merge(Block one, Block two) {
+        one.setMem_size(one.getMem_size()+ two.getMem_size());
         one.next = two.next;
     }
 }
