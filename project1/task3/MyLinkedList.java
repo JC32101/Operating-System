@@ -32,7 +32,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
     }
     
     public void removeHead() {
-    	head = head.next;
+    	head = head.getNext();
     }
 
     //Inserts the allocated offset and size into LinkedList
@@ -47,19 +47,19 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         Block pointerBlock = head;
         Iterator it = this.iterator();
         if(blockToInsert.getOffset() < pointerBlock.getOffset()){ //Head Case
-            blockToInsert.next = pointerBlock;
+            blockToInsert.setNext(pointerBlock);
             head = blockToInsert;
             return;
         }
-        while(it.hasNext() == true && blockToInsert.getOffset() > pointerBlock.next.getOffset()){
+        while(it.hasNext() == true && blockToInsert.getOffset() > pointerBlock.getNext().getOffset()){
         	it.next();
-            pointerBlock = pointerBlock.next;
+            pointerBlock = pointerBlock.getNext();
         }
-        if(pointerBlock.next == null) {
-            pointerBlock.next = blockToInsert;
+        if(pointerBlock.getNext() == null) {
+            pointerBlock.setNext(blockToInsert);
         }else{
-            blockToInsert.next = pointerBlock.next;
-            pointerBlock.next = blockToInsert;
+            blockToInsert.setNext(pointerBlock.getNext());
+            pointerBlock.setNext(blockToInsert);
         }
         return;
     }
@@ -71,17 +71,17 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         }
         int mem_size = 0;
         if(blockToDelete.getOffset() == head.getOffset()){
-            head = head.next;
+            head = head.getNext();
         }else {
             Iterator it = this.iterator();
-            while (it.hasNext() == true && blockToDelete.getOffset() > pointerBlock.next.getOffset()) {
-                pointerBlock = pointerBlock.next;
+            while (it.hasNext() == true && blockToDelete.getOffset() > pointerBlock.getNext().getOffset()) {
+                pointerBlock = pointerBlock.getNext();
             }
-            if (pointerBlock.next == null || (pointerBlock.getOffset() < blockToDelete.getOffset() && blockToDelete.getOffset() < pointerBlock.next.getOffset())) {
+            if (pointerBlock.getNext() == null || (pointerBlock.getOffset() < blockToDelete.getOffset() && blockToDelete.getOffset() < pointerBlock.getNext().getOffset())) {
                 // not found, cannot free
-            }else if(blockToDelete.getOffset() == pointerBlock.next.getOffset()){
-                pointerBlock.next = pointerBlock.next.next;
-                blockToDelete.next = null;
+            }else if(blockToDelete.getOffset() == pointerBlock.getNext().getOffset()){
+                pointerBlock.setNext(pointerBlock.getNext().getNext());
+                blockToDelete.setNext(null);
             }
         }
         return blockToDelete;
@@ -97,7 +97,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         int count = 0;
         while (pointerBlock != null) {
             count += pointerBlock.getMem_size();
-            pointerBlock = pointerBlock.next;
+            pointerBlock = pointerBlock.getNext();
         }
         return count;
     }
@@ -109,7 +109,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         }
         String string = "";
         Iterator it = this.iterator();
-        for(Block pointerBlock = head; pointerBlock != null; pointerBlock = pointerBlock.next) {
+        for(Block pointerBlock = head; pointerBlock != null; pointerBlock = pointerBlock.getNext()) {
             string += pointerBlock.toString();
         }
         return string;
@@ -123,15 +123,15 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
     	private Block currentBlock = head;
 
         public boolean hasNext() {
-            return (currentBlock.next != null);
+            return (currentBlock.getNext() != null);
         }
 
         public Block next() {
-            currentBlock = currentBlock.next;
-            return new Block(currentBlock.getOffset(), currentBlock.getMem_size(), currentBlock.next);
+            currentBlock = currentBlock.getNext();
+            return new Block(currentBlock.getOffset(), currentBlock.getMem_size(), currentBlock.getNext());
         }
         public Block getCurrentBlock(){
-            return new Block(currentBlock.getOffset(), currentBlock.getMem_size(), currentBlock.next);
+            return new Block(currentBlock.getOffset(), currentBlock.getMem_size(), currentBlock.getNext());
         }
 
     };
