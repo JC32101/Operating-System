@@ -4,21 +4,40 @@ import java.util.Iterator;
 class MyLinkedList implements Iterable { //generic types are not required, you can just do Task2.MyLinkedList for blocks but Iterable is mandatory.
     //in addition to other regular list member functions such as insert and delete: (split and consolidate blocks must be implemented at the level of linked list)
 
-    public Block head;
+    private Block head;
 
     //Empty LinkedList
     public MyLinkedList() {
         this.head = null;
     }
-
-    //Returns a new LinkedList with the given ListNode
-    private MyLinkedList(Block head) {
-        this.head = head;
+    
+    public MyLinkedList(int mem_size) {
+        head = new Block(1, mem_size);
+    }
+    
+    public boolean isEmpty() {
+    	if (head == null) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
+    
+    public Block getHead() {
+    	return head;
+    }
+    
+    public void setHead(Block b) {
+    	head = b;
+    }
+    
+    public void removeHead() {
+    	head = head.next;
     }
 
     //Inserts the allocated offset and size into LinkedList
     public void insertSort(Block blockToInsert) {
-        if(blockToInsert.offset <=0 || blockToInsert.mem_size <= 0){
+        if(blockToInsert.getOffset() <=0 || blockToInsert.getMem_size() <= 0){
             //Error cannot alloc 0 anything
         }
         if (head == null) { //Head case
@@ -27,13 +46,14 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         }
         Block pointerBlock = head;
         Iterator it = this.iterator();
-        if(blockToInsert.offset < pointerBlock.offset){ //Head Case
+        if(blockToInsert.getOffset() < pointerBlock.getOffset()){ //Head Case
             blockToInsert.next = pointerBlock;
             head = blockToInsert;
             return;
         }
-        while(it.hasNext() == true && blockToInsert.offset > pointerBlock.next.offset){
-            pointerBlock = (Block) it.next();
+        while(it.hasNext() == true && blockToInsert.getOffset() > pointerBlock.next.getOffset()){
+        	it.next();
+            pointerBlock = pointerBlock.next;
         }
         if(pointerBlock.next == null) {
             pointerBlock.next = blockToInsert;
@@ -46,20 +66,20 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
 
     public Block delete(Block blockToDelete){ //return int mem_size to free?
         Block pointerBlock = head;
-        if(head == null || blockToDelete.offset <= head.offset || blockToDelete.mem_size <=0){
+        if(head == null || blockToDelete.getOffset() <= head.getOffset() || blockToDelete.getMem_size() <=0){
             //Error cannot delete 0 anything or delete from empty list
         }
         int mem_size = 0;
-        if(blockToDelete.offset == head.offset){
+        if(blockToDelete.getOffset() == head.getOffset()){
             head = head.next;
         }else {
             Iterator it = this.iterator();
-            while (it.hasNext() == true && blockToDelete.offset > pointerBlock.next.offset) {
-                pointerBlock = (Block) it.next();
+            while (it.hasNext() == true && blockToDelete.getOffset() > pointerBlock.next.getOffset()) {
+                pointerBlock = pointerBlock.next;
             }
-            if (pointerBlock.next == null || (pointerBlock.offset < blockToDelete.offset && blockToDelete.offset < pointerBlock.next.offset)) {
+            if (pointerBlock.next == null || (pointerBlock.getOffset() < blockToDelete.getOffset() && blockToDelete.getOffset() < pointerBlock.next.getOffset())) {
                 // not found, cannot free
-            }else if(blockToDelete.offset == pointerBlock.next.offset){
+            }else if(blockToDelete.getOffset() == pointerBlock.next.getOffset()){
                 pointerBlock.next = pointerBlock.next.next;
                 blockToDelete.next = null;
             }
@@ -76,7 +96,7 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         Block pointerBlock = head;
         int count = 0;
         while (pointerBlock != null) {
-            count += pointerBlock.mem_size;
+            count += pointerBlock.getMem_size();
             pointerBlock = pointerBlock.next;
         }
         return count;
@@ -89,30 +109,30 @@ class MyLinkedList implements Iterable { //generic types are not required, you c
         }
         String string = "";
         Iterator it = this.iterator();
-        for(Block pointerBlock = head; pointerBlock != null; pointerBlock = (Block) it.next()) {
+        for(Block pointerBlock = head; pointerBlock != null; pointerBlock = pointerBlock.next) {
             string += pointerBlock.toString();
         }
         return string;
     }
 
-    @Override
-    public Iterator iterator() {
-        return new Iterator() {
-
-            private Block currentBlock = head;
-
-            public boolean hasNext() {
-                return (currentBlock.next != null);
-            }
-
-            public Block next() {
-                currentBlock = currentBlock.next;
-                return currentBlock;
-            }
-            public Block getCurrentBlock(){
-                return currentBlock;
-            }
-
-        };
+    public BlockIterator iterator() {
+    	return new BlockIterator();
     }
+    
+    private class BlockIterator implements Iterator  {
+    	private Block currentBlock = head;
+
+        public boolean hasNext() {
+            return (currentBlock.next != null);
+        }
+
+        public Block next() {
+            currentBlock = currentBlock.next;
+            return new Block(currentBlock.getOffset(), currentBlock.getMem_size(), currentBlock.next);
+        }
+        public Block getCurrentBlock(){
+            return new Block(currentBlock.getOffset(), currentBlock.getMem_size(), currentBlock.next);
+        }
+
+    };
 }
