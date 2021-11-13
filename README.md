@@ -6,10 +6,3 @@ Team Members: Josephine Chan, Jack Egan, Lily Kiziriya
 [UML worksheet](https://app.creately.com/diagram/qOJOpUSdyhV/edit)
 
 [Project 2 Grading Sheet](https://docs.google.com/spreadsheets/d/1FkV_QuVQNjVY3fdZuPqBl-Ceic4alYqzQUroIw6YmNU/edit?usp=sharing)
-
-
-Dear all,
-
-Project2 structure is different. no task*.  Thanks!
-
--Your professor.
