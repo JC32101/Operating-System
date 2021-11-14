@@ -28,8 +28,7 @@ public class MyPageTable<PageTableEntry> {
 
     public void put(int pfn,  int vpn) {
         PageTableEntry n = new PageTableEntry(pfn, vpn);
-        Integer pfnWrap = Integer.valueOf(pfn);
-        int bucket = Math.abs(pfnWrap.hashCode() % numBuckets);
+        int bucket = Math.abs(hash(pfn)) % numBuckets;
         if (buckets[bucket] == null) {
         	buckets[bucket] = n;
         } else {
@@ -48,8 +47,7 @@ public class MyPageTable<PageTableEntry> {
     }
 
     public boolean contains(int pfn) {
-    	Integer pfnWrap = Integer.valueOf(pfn);
-        int bucket = Math.abs(pfnWrap.hashCode() % numBuckets);
+    	int bucket = Math.abs(hash(pfn)) % numBuckets;
         PageTableEntry currentBucket = buckets[bucket];
         while (currentBucket != null) {
         	if (currentBucket.pfn == pfn) {
@@ -62,8 +60,7 @@ public class MyPageTable<PageTableEntry> {
 
     public PageTableEntry get(int pfn) {
         if(contains(pfn)){
-        	Integer pfnWrap = Integer.valueOf(pfn);
-            int bucket = Math.abs(pfnWrap.hashCode() % numBuckets);
+        	int bucket = Math.abs(hash(pfn)) % numBuckets;
             PageTableEntry currentBucket = buckets[bucket];
             while (currentBucket != null) {
             	if (currentBucket.pfn == pfn) {
@@ -99,8 +96,7 @@ public class MyPageTable<PageTableEntry> {
         if(contains(pfn) == false)
             throw new NoSuchElementException();
         else{
-        	Integer pfnWrap = Integer.valueOf(pfn);
-            int bucket = Math.abs(pfnWrap.hashCode() % numBuckets);
+        	int bucket = Math.abs(hash(pfn)) % numBuckets;
             if (buckets[bucket].pfn == pfn) {
             	buckets[bucket] = buckets[bucket].next;
             } else {
@@ -125,5 +121,14 @@ public class MyPageTable<PageTableEntry> {
                 "numBuckets=" + numBuckets +
                 ", buckets=" + Arrays.toString(buckets) +
                 '}';
+    }
+    
+    private int hash(int a) {
+    	//CREDIT TO mikera ON STACKOVERFLOW
+    	//https://stackoverflow.com/questions/6082915/a-good-hash-function-to-use-in-interviews-for-integer-numbers-strings
+    	a ^= (a << 13);
+        a ^= (a >>> 17);        
+        a ^= (a << 5);
+        return a; 
     }
 }
