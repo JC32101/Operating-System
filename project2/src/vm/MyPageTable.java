@@ -28,8 +28,10 @@ public class MyPageTable<PageTableEntry> {
     private int numBuckets = 10;
     private PageTableEntry[] buckets;
     private int count = 0;
+    private FIFOPolicy policy;
     
     public MyPageTable() {
+    	policy = new FIFOPolicy();
         buckets = new PageTableEntry[numBuckets];
         vpnToPfn = new int[1024];
         for (int i = 0; i < 1024; i++) {
@@ -39,6 +41,7 @@ public class MyPageTable<PageTableEntry> {
 //            buckets[i] = new PageTableEntry();
 //I'm thinking it's better to create PTE only when needed instead of initializing a bunch of empty ones
     }
+    
     
     public int transToPfn(int vpn) throws PageFaultException{
     	int pfn = vpnToPfn[vpn];
@@ -149,6 +152,22 @@ public class MyPageTable<PageTableEntry> {
         }
     }
     
+    public boolean isDirty(int key) { //for when a vpn to pfn value is no longer valid
+    	int bucket = Math.abs(hash(key)) % numBuckets;
+    	if (buckets[bucket].key == key) {
+        	return buckets[bucket].dirty;
+        } else {
+        	PageTableEntry currentBucket = buckets[bucket];
+        	while (currentBucket.next != null) {
+        		currentBucket = currentBucket.next;
+        		if (currentBucket.key == key) {
+        			return buckets[bucket].dirty;
+        		}
+        	}
+        }
+		return false;
+    }
+    
     public int getNumBuckets () {
         return numBuckets;
     }
@@ -169,4 +188,11 @@ public class MyPageTable<PageTableEntry> {
         a ^= (a << 5);
         return a; 
     }
+
+
+	public int mapPage(int vpn) {
+		int pfn = policy.getPfnToWrite();
+		vpnToPfn[vpn] = pfn;
+		return pfn;
+	}
 }
