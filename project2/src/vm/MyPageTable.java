@@ -28,10 +28,8 @@ public class MyPageTable<PageTableEntry> {
     private int numBuckets = 10;
     private PageTableEntry[] buckets;
     private int count = 0;
-    private FIFOPolicy policy;
     
     public MyPageTable() {
-    	policy = new FIFOPolicy();
         buckets = new PageTableEntry[numBuckets];
         vpnToPfn = new int[1024];
         for (int i = 0; i < 1024; i++) {
@@ -43,7 +41,7 @@ public class MyPageTable<PageTableEntry> {
     }
     
     
-    public int transToPfn(int vpn) throws PageFaultException{
+    public int transToPfn(int vpn) throws PageFaultException{ //TODO: implement nested hashtable that uses VPN as key
     	int pfn = vpnToPfn[vpn];
     	if (pfn == -1 || get(pfn) == null || get(pfn).dirty == true) { //dirty page will be left in table
     		throw new PageFaultException();
@@ -154,6 +152,9 @@ public class MyPageTable<PageTableEntry> {
     
     public boolean isDirty(int key) { //for when a vpn to pfn value is no longer valid
     	int bucket = Math.abs(hash(key)) % numBuckets;
+    	if (buckets[key] == null) {
+    		return false;
+    	}
     	if (buckets[bucket].key == key) {
         	return buckets[bucket].dirty;
         } else {
@@ -188,11 +189,20 @@ public class MyPageTable<PageTableEntry> {
         a ^= (a << 5);
         return a; 
     }
-
-
-	public int mapPage(int vpn) {
-		int pfn = policy.getPfnToWrite();
-		vpnToPfn[vpn] = pfn;
-		return pfn;
-	}
+    
+    public void addVpnToPfn(int vpn, int pfn) {
+    	vpnToPfn[vpn] = pfn;
+    }
+    
+    public int[] getDirtyPages() { 
+    	int[] dirtyFrames = new int[1024];
+    	for (int i = 0; i < 1024; i++) {
+    		if (vpnToPfn[i] != -1) {
+    			if (isDirty(vpnToPfn[i])) {
+    				dirtyFrames[i] = vpnToPfn[i];
+    			}
+    		}
+    	}
+    	return dirtyFrames;
+    }
 }

@@ -5,16 +5,18 @@ import storage.PhyMemory;
 public class VirtMemory extends Memory {
 
 	MyPageTable pt;
+	FIFOPolicy policy;
 	
 	public VirtMemory(PhyMemory ram) {
 		super(ram);
 		pt = new MyPageTable();
-		// TODO Auto-generated constructor stub
+		policy = new FIFOPolicy();
 	}
 	
 	public VirtMemory() {
 		super(new PhyMemory());
 		pt = new MyPageTable();
+		policy = new FIFOPolicy();
     }
 
 	@Override
@@ -29,13 +31,14 @@ public class VirtMemory extends Memory {
 		try {
 			pfn = pt.transToPfn(vpn);
 		} catch (PageFaultException e) {
-			pfn = pt.mapPage(vpn);
+			pfn = policy.getPfnToWrite();
 			if (pt.isDirty(pfn)) {
-				ram.store(0, pfn*64+offset); //first value needs to be the blocks of physical mem to write to, not 0
+				ram.store(vpn, pfn*64);
 			}
+			pt.addVpnToPfn(vpn, pfn);
 		}
+	
 		ram.write(pfn*64 + offset, value);
-		
 	}
 
 	@Override
@@ -50,15 +53,23 @@ public class VirtMemory extends Memory {
 		try {
 			pfn = pt.transToPfn(vpn);
 		} catch (PageFaultException e) {
-			
+			pfn = policy.getPfnToWrite();
+			if (pt.isDirty(pfn)) {
+				ram.store(vpn, pfn*64+offset);
+			}
+		ram.load(vpn, pfn*64 + offset);
 		}
 		return ram.read(pfn*64 + offset);
 	}
 
 	@Override
 	protected void sync_to_disk() {
-		// TODO Auto-generated method stub
-		
+		int[] dirtyPages = pt.getDirtyPages();
+		for (int i = 0; i < 256; i++) {
+			if (dirtyPages[i] == 1) {
+				ram.store(i, dirtyPages[i]);
+			}
+		}
 	}
 
 }
