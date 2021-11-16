@@ -1,29 +1,8 @@
 package vm;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
-public class MyPageTable<PageTableEntry> {
-	
-    private static class PageTableEntry {
-        int key;
-        int transKey;
-        boolean dirty;
-        PageTableEntry next; //in case of a hash collision, PTEs can be chained together
-        
-        PageTableEntry(int key, int transKey) {
-            this.key = key;
-            this.transKey = transKey;
-            this.dirty = false;
-        }
-        
-        public String toString() {
-        	String info = "PFN: " + key + " VPN: " + transKey + " Dirty: " + dirty + " Next's Info " + next;
-        	return info;
-        }
-        
-    }
+public class MyPageTable {
+
     private int[] vpnToPfn;
     private int numBuckets = 10;
     private PageTableEntry[] buckets;
@@ -43,7 +22,7 @@ public class MyPageTable<PageTableEntry> {
     
     public int transToPfn(int vpn) throws PageFaultException{ //TODO: implement nested hashtable that uses VPN as key
     	int pfn = vpnToPfn[vpn];
-    	if (pfn == -1 || get(pfn) == null || get(pfn).dirty == true) { //dirty page will be left in table
+    	if (pfn == -1 || get(pfn) == null || get(pfn).isDirty() == true) { //dirty page will be left in table
     		throw new PageFaultException();
     	}
     	return vpnToPfn[vpn];
@@ -56,10 +35,10 @@ public class MyPageTable<PageTableEntry> {
         	buckets[bucket] = n;
         } else {
         	PageTableEntry currentEntry = buckets[bucket];
-        	while (buckets[bucket].next != null) {
-        		currentEntry = buckets[bucket].next;
+        	while (buckets[bucket].getNext() != null) {
+        		currentEntry = buckets[bucket].getNext();
         	}
-        	currentEntry.next = n;
+        	currentEntry.getNext().equals(n);
         }
         count++;
         vpnToPfn[transKey] = key;
@@ -72,10 +51,10 @@ public class MyPageTable<PageTableEntry> {
     	int bucket = Math.abs(hash(key)) % numBuckets;
         PageTableEntry currentBucket = buckets[bucket];
         while (currentBucket != null) {
-        	if (currentBucket.key == key) {
+        	if (currentBucket.getKey() == key) {
         		return true;
         	}
-        	currentBucket = buckets[bucket].next;
+        	currentBucket = buckets[bucket].getNext();
         	}
         return false;
         }
@@ -85,7 +64,7 @@ public class MyPageTable<PageTableEntry> {
         	int bucket = Math.abs(hash(key)) % numBuckets;
             PageTableEntry currentBucket = buckets[bucket];
             while (currentBucket != null) {
-            	if (currentBucket.key == key) {
+            	if (currentBucket.getKey() == key) {
             		return currentBucket;
             	}
             }
@@ -104,13 +83,13 @@ public class MyPageTable<PageTableEntry> {
         		continue;
         	}
             PageTableEntry a = oldBuckets[i];
-            int bucket = Math.abs(hash(a.key) % numBuckets);
+            int bucket = Math.abs(hash(a.getKey()) % numBuckets);
             buckets[bucket] = oldBuckets[i];
             count++;
             PageTableEntry currentBucket = buckets[bucket];
-            while(currentBucket.next != null){
-            	currentBucket = currentBucket.next;
-                int bucket2 = Math.abs(hash(currentBucket.key) % numBuckets);
+            while(currentBucket.getNext() != null){
+            	currentBucket = currentBucket.getNext();
+                int bucket2 = Math.abs(hash(currentBucket.getKey()) % numBuckets);
                 buckets[bucket2] = currentBucket;
                 count++;
             }
@@ -122,12 +101,12 @@ public class MyPageTable<PageTableEntry> {
             throw new NoSuchElementException();
         else{
         	int bucket = Math.abs(hash(key)) % numBuckets;
-            if (buckets[bucket].key == key) {
-            	buckets[bucket] = buckets[bucket].next;
+            if (buckets[bucket].getKey() == key) {
+            	buckets[bucket] = buckets[bucket].getNext();
             } else {
             	PageTableEntry prevBucket = buckets[bucket];
-            	if (prevBucket.next.key == key) {
-            		prevBucket.next = prevBucket.next.next;
+            	if (prevBucket.getNext().getKey() == key) {
+            		prevBucket.setNext(prevBucket.getNext().getNext());
             	}
             }
             count--;
@@ -136,14 +115,14 @@ public class MyPageTable<PageTableEntry> {
 
     public void dirtifyEntry(int key) { //for when a vpn to pfn value is no longer valid
     	int bucket = Math.abs(hash(key)) % numBuckets;
-    	if (buckets[bucket].key == key) {
-        	buckets[bucket].dirty = true;
+    	if (buckets[bucket].getKey() == key) {
+        	buckets[bucket].setDirty(true);
         } else {
         	PageTableEntry currentBucket = buckets[bucket];
-        	while (currentBucket.next != null) {
-        		currentBucket = currentBucket.next;
-        		if (currentBucket.key == key) {
-        			currentBucket.dirty = true;
+        	while (currentBucket.getNext() != null) {
+        		currentBucket = currentBucket.getNext();
+        		if (currentBucket.getKey() == key) {
+        			currentBucket.setDirty(true);
         			return;
         		}
         	}
@@ -155,14 +134,14 @@ public class MyPageTable<PageTableEntry> {
     	if (buckets[key] == null) {
     		return false;
     	}
-    	if (buckets[bucket].key == key) {
-        	return buckets[bucket].dirty;
+    	if (buckets[bucket].getKey() == key) {
+        	return buckets[bucket].isDirty();
         } else {
         	PageTableEntry currentBucket = buckets[bucket];
-        	while (currentBucket.next != null) {
-        		currentBucket = currentBucket.next;
-        		if (currentBucket.key == key) {
-        			return buckets[bucket].dirty;
+        	while (currentBucket.getNext() != null) {
+        		currentBucket = currentBucket.getNext();
+        		if (currentBucket.getKey() == key) {
+        			return buckets[bucket].isDirty();
         		}
         	}
         }
