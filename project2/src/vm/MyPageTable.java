@@ -1,54 +1,34 @@
-package vm;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-public class MyPageTable {
+import vm.PageTableEntry;
 
-    private int[] vpnToPfn;
-    private int numBuckets = 10;
-    private PageTableEntry[] buckets;
-    private int count = 0;
-    
-    public MyPageTable() {
-        buckets = new PageTableEntry[numBuckets];
-        vpnToPfn = new int[1024];
-        for (int i = 0; i < 1024; i++) {
-        	vpnToPfn[i] = -1;
-        }
-//        for(int i = 0; i < numBuckets; i++)
-//            buckets[i] = new PageTableEntry();
-//I'm thinking it's better to create PTE only when needed instead of initializing a bunch of empty ones
-    }
-    
-    
-    public int transToPfn(int vpn) throws PageFaultException{ //TODO: implement nested hashtable that uses VPN as key
-    	int pfn = vpnToPfn[vpn];
-    	if (pfn == -1 || get(pfn) == null || get(pfn).isDirty() == true) { //dirty page will be left in table
-    		throw new PageFaultException();
-    	}
-    	return vpnToPfn[vpn];
-    }
+public class MyPageTable<DataType> {
+	private int numBuckets = 64;
+	private PageTableEntry[] buckets;
+	private int count = 0;
+	public MyPageTable() {
+		buckets = new PageTableEntry[numBuckets];
+		//for (int i = 0; i < numBuckets; i++) {
+		//	buckets[i] = new ArrayList<DataType>();//?????
+		//}
+	}
 
-    public void put(int key,  int transKey) {
-        PageTableEntry n = new PageTableEntry(key, transKey);
-        int bucket = Math.abs(hash(key)) % numBuckets;
-        if (buckets[bucket] == null) {
-        	buckets[bucket] = n;
-        } else {
-        	PageTableEntry currentEntry = buckets[bucket];
-        	while (buckets[bucket].getNext() != null) {
-        		currentEntry = buckets[bucket].getNext();
-        	}
-        	currentEntry.getNext().equals(n);
-        }
+	public void put(int key,  int transKey) {
+		PageTableEntry n = new PageTableEntry(key, transKey);
+		int bucket = Math.abs(hash(key)) % numBuckets; //bucket is the index after hashing the key.
+		buckets[bucket] = insertIntoBucket(n, buckets[bucket]);
         count++;
-        vpnToPfn[transKey] = key;
-        if((double)count/numBuckets >= 0.5){
-          rehash();
-       }
-    }
+		//TODO: your code here to call rehash as needed
+		if((double)count/numBuckets >= 0.5){
+			rehash();
+		}
+	}
 
-    public boolean contains(int key){
-    	int bucket = Math.abs(hash(key)) % numBuckets;
+	public boolean contains(int key) {
+		//TODO: your code here
+		int bucket = Math.abs(hash(key)) % numBuckets;
         PageTableEntry currentBucket = buckets[bucket];
         while (currentBucket != null) {
         	if (currentBucket.getKey() == key) {
@@ -57,110 +37,65 @@ public class MyPageTable {
         	currentBucket = buckets[bucket].getNext();
         	}
         return false;
-        }
+	}
 
-    public PageTableEntry get(int key){
-        if(contains(key)){
-        	int bucket = Math.abs(hash(key)) % numBuckets;
-            PageTableEntry currentBucket = buckets[bucket];
-            while (currentBucket != null) {
-            	if (currentBucket.getKey() == key) {
-            		return currentBucket;
-            	}
-            }
-        }
-		return null;
-    }
+	//public void remove(DataType item) {
+	//	//TODO: your code here
+	//	if(contains(item) == false)
+	//		throw new NoSuchElementException();
+	//	else{
+	//		int bucket = Math.abs(item.hashCode() % numBuckets);
+	//		buckets[bucket].remove(item);
+	//		count--;
+	//	}
+	//}
 
-    private void rehash() {
-        PageTableEntry[] oldBuckets = buckets;
-        numBuckets*=2;
-        count = 0;
-        buckets = new PageTableEntry[numBuckets];
+	private void rehash() {//a stands for oldtable traversal pointer
+		//TODO: your code here
+		PageTableEntry[] oldBuckets = buckets;
+		numBuckets*=2;
+		count = 0;
+		buckets = new PageTableEntry[numBuckets];
+		PageTableEntry oldNodes;
 
-        for(int i = 0; i < oldBuckets.length; i++){
+		//for (int i = 0; i < numBuckets; i++) {
+		//	buckets[i] = new ArrayList<DataType>();
+		//}
+		for(int i = 0; i < oldBuckets.length; i++){
         	if (oldBuckets[i] == null) {
         		continue;
         	}
-            PageTableEntry a = oldBuckets[i];
-            int bucket = Math.abs(hash(a.getKey()) % numBuckets);
-            buckets[bucket] = oldBuckets[i];
-            count++;
-            PageTableEntry currentBucket = buckets[bucket];
-            while(currentBucket.getNext() != null){
-            	currentBucket = currentBucket.getNext();
-                int bucket2 = Math.abs(hash(currentBucket.getKey()) % numBuckets);
-                buckets[bucket2] = currentBucket;
-                count++;
+			oldNodes = oldBuckets[i];
+            while(oldNodes != null){
+				PageTableEntry frontNode = oldNodes;
+				frontNode.getNext().equals(null);
+            	int bucket = Math.abs(hash(frontNode.getKey()) % numBuckets);
+            	buckets[bucket] = insertIntoBucket(frontNode, buckets[bucket]);
+				oldNodes.getNext();
+            	count++;
             }
         }
-    }
+	}
 
-    public void remove(int key) {
-        if(contains(key) == false)
-            throw new NoSuchElementException();
-        else{
-        	int bucket = Math.abs(hash(key)) % numBuckets;
-            if (buckets[bucket].getKey() == key) {
-            	buckets[bucket] = buckets[bucket].getNext();
-            } else {
-            	PageTableEntry prevBucket = buckets[bucket];
-            	if (prevBucket.getNext().getKey() == key) {
-            		prevBucket.setNext(prevBucket.getNext().getNext());
-            	}
-            }
-            count--;
-        }
-    }
-
-    public void dirtifyEntry(int key) { //for when a vpn to pfn value is no longer valid
-    	int bucket = Math.abs(hash(key)) % numBuckets;
-    	if (buckets[bucket].getKey() == key) {
-        	buckets[bucket].setDirty(true);
+	public PageTableEntry insertIntoBucket(PageTableEntry node, PageTableEntry finalLinkedList){
+		if (finalLinkedList == null) {
+        	finalLinkedList = node;
+			return finalLinkedList;
         } else {
-        	PageTableEntry currentBucket = buckets[bucket];
-        	while (currentBucket.getNext() != null) {
-        		currentBucket = currentBucket.getNext();
-        		if (currentBucket.getKey() == key) {
-        			currentBucket.setDirty(true);
-        			return;
-        		}
+        	PageTableEntry currentEntry = finalLinkedList;
+        	while (finalLinkedList.getNext() != null) {
+        		currentEntry = finalLinkedList.getNext();
         	}
+        	currentEntry.getNext().equals(node);
+			return finalLinkedList;
         }
-    }
-    
-    public boolean isDirty(int key) { //for when a vpn to pfn value is no longer valid
-    	int bucket = Math.abs(hash(key)) % numBuckets;
-    	if (buckets[key] == null) {
-    		return false;
-    	}
-    	if (buckets[bucket].getKey() == key) {
-        	return buckets[bucket].isDirty();
-        } else {
-        	PageTableEntry currentBucket = buckets[bucket];
-        	while (currentBucket.getNext() != null) {
-        		currentBucket = currentBucket.getNext();
-        		if (currentBucket.getKey() == key) {
-        			return buckets[bucket].isDirty();
-        		}
-        	}
-        }
-		return false;
-    }
-    
-    public int getNumBuckets () {
-        return numBuckets;
-    }
+	}
 
-    @Override
-    public String toString() {
-        return "{" +
-                "numBuckets=" + numBuckets +
-                ", buckets=" + Arrays.toString(buckets) +
-                '}';
-    }
-    
-    private int hash(int a) {
+	public int getNumBuckets () {
+		return numBuckets;
+	}
+
+	private int hash(int a) {
     	//CREDIT TO mikera ON STACKOVERFLOW
     	//https://stackoverflow.com/questions/6082915/a-good-hash-function-to-use-in-interviews-for-integer-numbers-strings
     	a ^= (a << 13);
@@ -168,20 +103,12 @@ public class MyPageTable {
         a ^= (a << 5);
         return a; 
     }
-    
-    public void addVpnToPfn(int vpn, int pfn) {
-    	vpnToPfn[vpn] = pfn;
-    }
-    
-    public int[] getDirtyPages() { 
-    	int[] dirtyFrames = new int[1024];
-    	for (int i = 0; i < 1024; i++) {
-    		if (vpnToPfn[i] != -1) {
-    			if (isDirty(vpnToPfn[i])) {
-    				dirtyFrames[i] = vpnToPfn[i];
-    			}
-    		}
-    	}
-    	return dirtyFrames;
-    }
+
+	@Override
+	public String toString() {
+		return "{" +
+				"numBuckets=" + numBuckets +
+				", buckets=" + Arrays.toString(buckets) +
+				'}';
+	}
 }
