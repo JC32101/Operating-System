@@ -67,6 +67,7 @@ public class MyPageTable {
             	if (currentBucket.getKey() == key) {
             		return currentBucket;
             	}
+            	currentBucket = currentBucket.getNext();
             }
         }
 		return null;
