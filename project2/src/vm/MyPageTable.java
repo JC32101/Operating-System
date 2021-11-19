@@ -72,29 +72,29 @@ public class MyPageTable {
 		return null;
     }
 
-    private void rehash() {
-        PageTableEntry[] oldBuckets = buckets;
-        numBuckets*=2;
-        count = 0;
-        buckets = new PageTableEntry[numBuckets];
-
-        for(int i = 0; i < oldBuckets.length; i++){
-        	if (oldBuckets[i] == null) {
-        		continue;
-        	}
-            PageTableEntry a = oldBuckets[i];
-            int bucket = Math.abs(hash(a.getKey()) % numBuckets);
-            buckets[bucket] = oldBuckets[i];
-            count++;
-            PageTableEntry currentBucket = buckets[bucket];
-            while(currentBucket.getNext() != null){
-            	currentBucket = currentBucket.getNext();
-                int bucket2 = Math.abs(hash(currentBucket.getKey()) % numBuckets);
-                buckets[bucket2] = currentBucket;
-                count++;
-            }
-        }
-    }
+//    private void rehash() {
+//        PageTableEntry[] oldBuckets = buckets;
+//        numBuckets*=2;
+//        count = 0;
+//        buckets = new PageTableEntry[numBuckets];
+//
+//        for(int i = 0; i < oldBuckets.length; i++){
+//        	if (oldBuckets[i] == null) {
+//        		continue;
+//        	}
+//            PageTableEntry a = oldBuckets[i];
+//            int bucket = Math.abs(hash(a.getKey()) % numBuckets);
+//            buckets[bucket] = oldBuckets[i];
+//            count++;
+//            PageTableEntry currentBucket = buckets[bucket];
+//            while(currentBucket.getNext() != null){
+//            	currentBucket = currentBucket.getNext();
+//                int bucket2 = Math.abs(hash(currentBucket.getKey()) % numBuckets);
+//                buckets[bucket2] = currentBucket;
+//                count++;
+//            }
+//        }
+//    }
 
     public void remove(int key) {
         if(contains(key) == false)
@@ -176,9 +176,12 @@ public class MyPageTable {
     public int[] getDirtyPages() { 
     	int[] dirtyFrames = new int[1024];
     	for (int i = 0; i < 1024; i++) {
+        	dirtyFrames[i] = -1;
+        }
+    	for (int i = 0; i < 1024; i++) {
     		if (vpnToPfn[i] != -1) {
     			if (isDirty(vpnToPfn[i])) {
-    				dirtyFrames[i] = vpnToPfn[i];
+    				dirtyFrames[i] = vpnToPfn[i]; //i is the vpn, dirtFrames[i] is the corresponding pfn
     			}
     		}
     	}

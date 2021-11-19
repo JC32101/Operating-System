@@ -36,9 +36,11 @@ public class VirtMemory extends Memory {
 				ram.store(vpn, pfn*64);
 			}
 			pt.addVpnToPfn(vpn, pfn);
+			pt.put(pfn, vpn); //we weren't creating PTEs before lol
 		}
-	
-		ram.write(pfn*64 + offset, value);
+		
+		ram.write(pfn*64+offset, value);
+		pt.dirtifyEntry(pfn);
 	}
 
 	@Override
@@ -55,18 +57,20 @@ public class VirtMemory extends Memory {
 		} catch (PageFaultException e) {
 			pfn = policy.getPfnToWrite();
 			if (pt.isDirty(pfn)) {
-				ram.store(vpn, pfn*64+offset);
+				ram.store(vpn, pfn*64);
 			}
-		ram.load(vpn, pfn*64 + offset);
+			pt.addVpnToPfn(vpn, pfn);
+			pt.put(pfn, vpn);
+			ram.load(vpn, pfn*64);
 		}
 		return ram.read(pfn*64 + offset);
 	}
 
 	@Override
-	protected void sync_to_disk() {
+	protected void sync_to_disk() { //this method was only looping to 256
 		int[] dirtyPages = pt.getDirtyPages();
-		for (int i = 0; i < 256; i++) {
-			if (dirtyPages[i] == 1) {
+		for (int i = 0; i < 1024; i++) {
+			if (dirtyPages[i] != -1) {
 				ram.store(i, dirtyPages[i]);
 			}
 		}

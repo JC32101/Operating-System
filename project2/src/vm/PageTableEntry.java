@@ -50,6 +50,10 @@ public class PageTableEntry {
     public PageTableEntry getNext() {
         return next;
     }
+    
+    public int getVpn() {
+    	return transKey;
+    }
 
     @Override
     public boolean equals(Object o) {
