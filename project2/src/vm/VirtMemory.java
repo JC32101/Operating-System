@@ -33,7 +33,7 @@ public class VirtMemory extends Memory {
 		} catch (PageFaultException e) {
 			pfn = policy.getPfnToWrite();
 			if (pt.isDirty(pfn)) {
-				ram.store(vpn, pfn*64);
+				ram.store(pt.valueLookup(pfn), pfn*64);
 			}
 			pt.addVpnToPfn(vpn, pfn);
 			pt.put(pfn, vpn); //we weren't creating PTEs before lol
@@ -57,7 +57,7 @@ public class VirtMemory extends Memory {
 		} catch (PageFaultException e) {
 			pfn = policy.getPfnToWrite();
 			if (pt.isDirty(pfn)) {
-				ram.store(vpn, pfn*64);
+				ram.store(pt.valueLookup(pfn), pfn*64);
 			}
 			pt.addVpnToPfn(vpn, pfn);
 			pt.put(pfn, vpn);

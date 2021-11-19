@@ -35,10 +35,10 @@ public class MyPageTable {
         	buckets[bucket] = n;
         } else {
         	PageTableEntry currentEntry = buckets[bucket];
-        	while (buckets[bucket].getNext() != null) {
-        		currentEntry = buckets[bucket].getNext();
+        	while (currentEntry.getNext() != null) {
+        		currentEntry = currentEntry.getNext();
         	}
-        	currentEntry.getNext().equals(n);
+        	currentEntry.setNext(n);
         }
         count++;
         vpnToPfn[transKey] = key;
@@ -131,7 +131,7 @@ public class MyPageTable {
     
     public boolean isDirty(int key) { //for when a vpn to pfn value is no longer valid
     	int bucket = Math.abs(hash(key)) % numBuckets;
-    	if (buckets[key] == null) {
+    	if (buckets[bucket] == null) {
     		return false;
     	}
     	if (buckets[bucket].getKey() == key) {
@@ -188,18 +188,18 @@ public class MyPageTable {
     	return dirtyFrames;
     }
 
-    public int addrLookup(int vpn){
-		int bucket = Math.abs(hash(vpn)) % numBuckets;
-		int pfn = -1;
+    public int valueLookup(int pfn){
+		int bucket = Math.abs(hash(pfn)) % numBuckets;
+		int vpn = -1;
         PageTableEntry currentBucket = buckets[bucket];
         while (currentBucket != null) {
-        	if (currentBucket.getKey() == vpn) {
-				pfn = currentBucket.getTransKey();
-        		return pfn;
+        	if (currentBucket.getKey() == pfn) {
+				vpn = currentBucket.getTransKey();
+        		return vpn;
         	}
         	currentBucket = currentBucket.getNext();
         	}
-        return pfn;
+        return vpn;
 	}
 
     private void rehash() {//a stands for oldtable traversal pointer
@@ -220,10 +220,9 @@ public class MyPageTable {
 			oldNodes = oldBuckets[i];
             while(oldNodes != null){
 				PageTableEntry frontNode = oldNodes;
-				frontNode.getNext().equals(null);
             	int bucket = Math.abs(hash(frontNode.getKey()) % numBuckets);
             	buckets[bucket] = insertIntoBucket(frontNode, buckets[bucket]);
-				oldNodes.getNext();
+				oldNodes = oldNodes.getNext();
             	count++;
             }
         }
@@ -235,10 +234,10 @@ public class MyPageTable {
 			return finalLinkedList;
         } else {
         	PageTableEntry currentEntry = finalLinkedList;
-        	while (finalLinkedList.getNext() != null) {
-        		currentEntry = finalLinkedList.getNext();
+        	while (currentEntry.getNext() != null) {
+        		currentEntry = currentEntry.getNext();
         	}
-        	currentEntry.getNext().equals(node);
+        	currentEntry.setNext(node);
 			return finalLinkedList;
         }
 	}
