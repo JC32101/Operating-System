@@ -184,4 +184,59 @@ public class MyPageTable {
     	}
     	return dirtyFrames;
     }
+
+    public int addrLookup(int vpn){
+		int bucket = Math.abs(hash(vpn)) % numBuckets;
+		int pfn = -1;
+        PageTableEntry currentBucket = buckets[bucket];
+        while (currentBucket != null) {
+        	if (currentBucket.getKey() == vpn) {
+				pfn = currentBucket.getTransKey();
+        		return pfn;
+        	}
+        	currentBucket = currentBucket.getNext();
+        	}
+        return pfn;
+	}
+
+    private void rehash() {//a stands for oldtable traversal pointer
+		//TODO: your code here
+		PageTableEntry[] oldBuckets = buckets;
+		numBuckets*=2;
+		count = 0;
+		buckets = new PageTableEntry[numBuckets];
+		PageTableEntry oldNodes;
+
+		//for (int i = 0; i < numBuckets; i++) {
+		//	buckets[i] = new ArrayList<DataType>();
+		//}
+		for(int i = 0; i < oldBuckets.length; i++){
+        	if (oldBuckets[i] == null) {
+        		continue;
+        	}
+			oldNodes = oldBuckets[i];
+            while(oldNodes != null){
+				PageTableEntry frontNode = oldNodes;
+				frontNode.getNext().equals(null);
+            	int bucket = Math.abs(hash(frontNode.getKey()) % numBuckets);
+            	buckets[bucket] = insertIntoBucket(frontNode, buckets[bucket]);
+				oldNodes.getNext();
+            	count++;
+            }
+        }
+	}
+
+    public PageTableEntry insertIntoBucket(PageTableEntry node, PageTableEntry finalLinkedList){
+		if (finalLinkedList == null) {
+        	finalLinkedList = node;
+			return finalLinkedList;
+        } else {
+        	PageTableEntry currentEntry = finalLinkedList;
+        	while (finalLinkedList.getNext() != null) {
+        		currentEntry = finalLinkedList.getNext();
+        	}
+        	currentEntry.getNext().equals(node);
+			return finalLinkedList;
+        }
+	}
 }
