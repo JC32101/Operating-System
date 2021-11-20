@@ -6,22 +6,25 @@ public class VirtMemory extends Memory {
 
 	MyPageTable pt;
 	FIFOPolicy policy;
+	int[] pageWrites;
 	
 	public VirtMemory(PhyMemory ram) {
 		super(ram);
 		pt = new MyPageTable();
 		policy = new FIFOPolicy();
+		pageWrites = new int[1024];
 	}
 	
 	public VirtMemory() {
 		super(new PhyMemory());
 		pt = new MyPageTable();
 		policy = new FIFOPolicy();
+		pageWrites = new int[1024];
     }
 
 	@Override
 	public void write(int addr, byte value) {
-		if (addr >= 65535 || addr < 0) {
+		if (addr > 65535 || addr < 0) {
 			System.err.println("Attempted write at " + addr + "! Out of bounds!");
 			return;
 		}
@@ -35,17 +38,28 @@ public class VirtMemory extends Memory {
 			if (pt.isDirty(pfn)) {
 				ram.store(pt.valueLookup(pfn), pfn*64);
 			}
+			if (pt.valueLookup(pfn) != -1) {
+				pt.removeVpnToPfn(pt.valueLookup(pfn));
+				pt.remove(pfn);
+			}
 			pt.addVpnToPfn(vpn, pfn);
 			pt.put(pfn, vpn); //we weren't creating PTEs before lol
+			ram.load(vpn, pfn*64);
 		}
 		
 		ram.write(pfn*64+offset, value);
+		pageWrites[vpn]++;
+		if (pageWrites[vpn] > 32) {
+			ram.store(vpn, pfn*64);
+			pageWrites[vpn] = 0;
+		}
+		
 		pt.dirtifyEntry(pfn);
 	}
 
 	@Override
 	public byte read(int addr) {
-		if (addr >= 65535 || addr < 0) {
+		if (addr > 65535 || addr < 0) {
 			System.err.println("Attempted read at " + addr + "! Out of bounds!");
 			return Byte.parseByte("-1");
 		}
@@ -58,6 +72,10 @@ public class VirtMemory extends Memory {
 			pfn = policy.getPfnToWrite();
 			if (pt.isDirty(pfn)) {
 				ram.store(pt.valueLookup(pfn), pfn*64);
+			}
+			if (pt.valueLookup(pfn) != -1) {
+				pt.removeVpnToPfn(pt.valueLookup(pfn));
+				pt.remove(pfn);
 			}
 			pt.addVpnToPfn(vpn, pfn);
 			pt.put(pfn, vpn);

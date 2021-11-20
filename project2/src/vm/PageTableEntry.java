@@ -54,6 +54,10 @@ public class PageTableEntry {
     public int getVpn() {
     	return transKey;
     }
+    
+    public void clearNext() {
+    	this.next = null;
+    }
 
     @Override
     public boolean equals(Object o) {

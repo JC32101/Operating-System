@@ -22,7 +22,7 @@ public class MyPageTable {
     
     public int transToPfn(int vpn) throws PageFaultException{ //TODO: implement nested hashtable that uses VPN as key
     	int pfn = vpnToPfn[vpn];
-    	if (pfn == -1 || get(pfn) == null || get(pfn).isDirty() == true) { //dirty page will be left in table
+    	if (pfn == -1 || get(pfn) == null) { //dirty page will be left in table
     		throw new PageFaultException();
     	}
     	return vpnToPfn[vpn];
@@ -54,7 +54,7 @@ public class MyPageTable {
         	if (currentBucket.getKey() == key) {
         		return true;
         	}
-        	currentBucket = buckets[bucket].getNext();
+        	currentBucket = currentBucket.getNext();
         	}
         return false;
         }
@@ -174,6 +174,10 @@ public class MyPageTable {
     	vpnToPfn[vpn] = pfn;
     }
     
+    public void removeVpnToPfn(int vpn) {
+    	vpnToPfn[vpn] = -1;
+    }
+    
     public int[] getDirtyPages() { 
     	int[] dirtyFrames = new int[1024];
     	for (int i = 0; i < 1024; i++) {
@@ -224,6 +228,12 @@ public class MyPageTable {
             	int bucket = Math.abs(hash(frontNode.getKey()) % numBuckets);
             	buckets[bucket] = insertIntoBucket(frontNode, buckets[bucket]);
 				oldNodes = oldNodes.getNext();
+				PageTableEntry addedEntry = buckets[bucket];
+				while (addedEntry != frontNode) {
+					addedEntry = addedEntry.getNext();
+				}
+				addedEntry.clearNext(); //we need to clear the "next" of the recently added node in order to avoid duplicate PTEs
+				//^^^without this insertIntoBucket will create PTEs that point to themselves
             	count++;
             }
         }
