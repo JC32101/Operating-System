@@ -130,6 +130,22 @@ public class MyPageTable {
         }
     }
     
+    public void cleanEntry(int key) {
+    	int bucket = Math.abs(hash(key)) % numBuckets;
+    	if (buckets[bucket].getKey() == key) {
+        	buckets[bucket].setDirty(false);
+        } else {
+        	PageTableEntry currentBucket = buckets[bucket];
+        	while (currentBucket.getNext() != null) {
+        		currentBucket = currentBucket.getNext();
+        		if (currentBucket.getKey() == key) {
+        			currentBucket.setDirty(false);
+        			return;
+        		}
+        	}
+        }
+    }
+    
     public boolean isDirty(int key) { //for when a vpn to pfn value is no longer valid
     	int bucket = Math.abs(hash(key)) % numBuckets;
     	if (buckets[bucket] == null) {

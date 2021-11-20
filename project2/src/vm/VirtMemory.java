@@ -37,6 +37,7 @@ public class VirtMemory extends Memory {
 			pfn = policy.getPfnToWrite();
 			if (pt.isDirty(pfn)) {
 				ram.store(pt.valueLookup(pfn), pfn*64);
+				pt.cleanEntry(pfn);
 			}
 			if (pt.valueLookup(pfn) != -1) {
 				pt.removeVpnToPfn(pt.valueLookup(pfn));
@@ -49,9 +50,11 @@ public class VirtMemory extends Memory {
 		
 		ram.write(pfn*64+offset, value);
 		pageWrites[vpn]++;
-		if (pageWrites[vpn] > 32) {
+		if (pageWrites[vpn] >= 32) {
 			ram.store(vpn, pfn*64);
 			pageWrites[vpn] = 0;
+			pt.cleanEntry(pfn);
+			return;
 		}
 		
 		pt.dirtifyEntry(pfn);
@@ -72,6 +75,7 @@ public class VirtMemory extends Memory {
 			pfn = policy.getPfnToWrite();
 			if (pt.isDirty(pfn)) {
 				ram.store(pt.valueLookup(pfn), pfn*64);
+				pt.cleanEntry(pfn);
 			}
 			if (pt.valueLookup(pfn) != -1) {
 				pt.removeVpnToPfn(pt.valueLookup(pfn));
