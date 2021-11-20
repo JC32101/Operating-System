@@ -3,32 +3,32 @@ package vm;
 import java.util.Objects;
 
 public class PageTableEntry {
-    private int key;
-    private int transKey;
+    private int vpn;
+    private int pfn;
     private boolean dirty;
     private PageTableEntry next; //in case of a hash collision, PTEs can be chained together
 
-    PageTableEntry(int key, int transKey) {
-        this.key = key;
-        this.transKey = transKey;
+    PageTableEntry(int vpn, int pfn) {
+        this.vpn = vpn;
+        this.pfn = pfn;
         this.dirty = false;
     }
 
     public String toString() {
-        String info = "PFN: " + key + " VPN: " + transKey + " Dirty: " + dirty + " Next's Info " + next;
+        String info = "VPN: " + vpn + " PFN: " + pfn + " Dirty: " + dirty + " Next's Info " + next;
         return info;
     }
 
     public void setKey(int key) {
-        this.key = key;
+        this.vpn = key;
     }
 
     public void setNext(PageTableEntry next) {
         this.next = next;
     }
 
-    public void setTransKey(int transKey) {
-        this.transKey = transKey;
+    public void setValue(int value) {
+        this.pfn = value;
     }
 
     public void setDirty(boolean dirty) {
@@ -36,15 +36,15 @@ public class PageTableEntry {
     }
 
     public int getKey() {
-        return key;
+        return vpn;
     }
 
     public boolean isDirty() {
         return dirty;
     }
 
-    public int getTransKey() {
-        return transKey;
+    public int getValue() {
+        return pfn;
     }
 
     public PageTableEntry getNext() {
@@ -57,13 +57,13 @@ public class PageTableEntry {
         if (!(o instanceof PageTableEntry)) return false;
         PageTableEntry that = (PageTableEntry) o;
         return getKey() == that.getKey() &&
-                getTransKey() == that.getTransKey() &&
+                getValue() == that.getValue() &&
                 isDirty() == that.isDirty() &&
                 Objects.equals(getNext(), that.getNext());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getKey(), getTransKey(), isDirty(), getNext());
+        return Objects.hash(getKey(), getValue(), isDirty(), getNext());
     }
 }
