@@ -51,25 +51,25 @@ public class VirtMemory extends Memory {
 			ram.load(vpn, pfn*64);
 		}
 		
-// 		ram.write(pfn*64+offset, value);
-// 		writeCount++;
-// 		pageWrites[vpn]++;
-// 		if (pageWrites[vpn] >= 32 || writeCount >= 32) {
-// 			ram.store(vpn, pfn*64);
-// 			pageWrites[vpn] = 0;
-// 			pt.cleanEntry(pfn);
-// 			writeCount = 0;
-// 			return;
-// 		}
-		
 		ram.write(pfn*64+offset, value);
+		writeCount++;
 		pageWrites[vpn]++;
-		if (pageWrites[vpn] >= 32) {
+		if (pageWrites[vpn] >= 32 || writeCount >= 32) {
 			ram.store(vpn, pfn*64);
 			pageWrites[vpn] = 0;
 			pt.cleanEntry(pfn);
+			writeCount = 0;
 			return;
 		}
+		
+// 		ram.write(pfn*64+offset, value);
+// 		pageWrites[vpn]++;
+// 		if (pageWrites[vpn] >= 32) {
+// 			ram.store(vpn, pfn*64);
+// 			pageWrites[vpn] = 0;
+// 			pt.cleanEntry(pfn);
+// 			return;
+// 		}
 		
 		pt.dirtifyEntry(pfn);
 	}
