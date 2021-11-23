@@ -1,10 +1,10 @@
 package vm;
 
-public class FIFOPolicy {
+public class Policy {
 	
 	private int pfnToWrite;
 	
-	public FIFOPolicy() {
+	public Policy() {
 		pfnToWrite = -1;
 	}
 	

@@ -4,22 +4,25 @@ import storage.PhyMemory;
 
 public class VirtMemory extends Memory {
 
-	MyPageTable pt;
-	FIFOPolicy policy;
-	int[] pageWrites;
+	private MyPageTable pt;
+	private Policy policy;
+	private int[] pageWrites;
+	private int writeCount;
 	
 	public VirtMemory(PhyMemory ram) {
 		super(ram);
 		pt = new MyPageTable();
-		policy = new FIFOPolicy();
+		policy = new Policy();
 		pageWrites = new int[1024];
+		writeCount = 0;
 	}
 	
 	public VirtMemory() {
 		super(new PhyMemory());
 		pt = new MyPageTable();
-		policy = new FIFOPolicy();
+		policy = new Policy();
 		pageWrites = new int[1024];
+		writeCount = 0;
     }
 
 	@Override
@@ -49,11 +52,13 @@ public class VirtMemory extends Memory {
 		}
 		
 		ram.write(pfn*64+offset, value);
+		writeCount++;
 		pageWrites[vpn]++;
-		if (pageWrites[vpn] >= 32) {
+		if (pageWrites[vpn] >= 32 || writeCount >= 32) {
 			ram.store(vpn, pfn*64);
 			pageWrites[vpn] = 0;
 			pt.cleanEntry(pfn);
+			writeCount = 0;
 			return;
 		}
 		
