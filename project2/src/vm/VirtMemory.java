@@ -62,6 +62,15 @@ public class VirtMemory extends Memory {
 			return;
 		}
 		
+// 		ram.write(pfn*64+offset, value);
+// 		pageWrites[vpn]++;
+// 		if (pageWrites[vpn] >= 32) {
+// 			ram.store(vpn, pfn*64);
+// 			pageWrites[vpn] = 0;
+// 			pt.cleanEntry(pfn);
+// 			return;
+// 		}
+		
 		pt.dirtifyEntry(pfn);
 	}
 
@@ -86,7 +95,7 @@ public class VirtMemory extends Memory {
 				pt.removeVpnToPfn(pt.valueLookup(pfn));
 				pt.remove(pfn);
 			}
- 			pt.addVpnToPfn(vpn, pfn);
+// 			pt.addVpnToPfn(vpn, pfn);
 			pt.put(pfn, vpn);
 			ram.load(vpn, pfn*64);
 		}
