@@ -46,7 +46,7 @@ public class VirtMemory extends Memory {
 				pt.removeVpnToPfn(pt.valueLookup(pfn));
 				pt.remove(pfn);
 			}
-			pt.addVpnToPfn(vpn, pfn);
+// 			pt.addVpnToPfn(vpn, pfn);
 			pt.put(pfn, vpn); //we weren't creating PTEs before lol
 			ram.load(vpn, pfn*64);
 		}
@@ -86,7 +86,7 @@ public class VirtMemory extends Memory {
 				pt.removeVpnToPfn(pt.valueLookup(pfn));
 				pt.remove(pfn);
 			}
-			pt.addVpnToPfn(vpn, pfn);
+// 			pt.addVpnToPfn(vpn, pfn);
 			pt.put(pfn, vpn);
 			ram.load(vpn, pfn*64);
 		}
