@@ -44,11 +44,32 @@ public class WordCountTest {
         assertEquals(0, ret);
         //Code review questions:
         //q1: How many partitions does this test set up?
+        
+        //This test sets up 2 partitions. This is evident from the fact that 2 reducer threads are
+        //created (4th value passed in when MRRun is called) and the number of partitions must be
+        //equal to the number of reducers.
+        
         //q2: Based on the Partitioner function in MapperReducerClientAPI, what should be stored in partition 0
         //and what should be stored in partition 1? (hint: you can write a little main() test func in MapperReducerClientAPI)
+        
+        //Partition 0 should hold (bar, woof, fox, boss) and partition 1 
+        //should hold (foo, foo, foo, road, road).
+        
         //q3: What are the key value pairs stored in the concurrent KV stores by reducers when the reduce() is called for the first time? Please use the format of 
-        //(key,{val_1,val_2,..val_n}).
+        //(key,{val_1,val_2,..val_n})
+        
+        //(bar,{1})
+        //(boss,{1})
+        //(foo,{1,1,1})
+        //(fox,{1})
+        //(road,{1,1}
+        //(woof,{1})
+        
         //q4: For key "foo", how many times does MRGetNext get invoked?
+        
+        //For "foo", MRGetNext will be invoked 4 times; 3 times to get all 3 "foo"s,
+        //and 1 more time to get null (causing the while loop to exit).
+        
     }
     @Test
     public  void test2_large_single() {
