@@ -1,2 +1,0 @@
- (tr ' ' '\n' | sort -f | uniq -c | awk '{print $2":"$1}') < cybersla |sort > cybersla_expect.txt
-
