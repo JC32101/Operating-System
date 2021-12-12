@@ -3,8 +3,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/* Reference: https://www.java67.com/2021/07/how-to-implement-thread-safe-bounded-buffer-in-java.html */
-
 public class BoundedBuffer <T> {
 //Please note the biggest difference between this BoundBuffer
 //and the one we demoed in class is <T>
