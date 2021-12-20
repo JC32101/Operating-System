@@ -12,7 +12,7 @@ public class MyMapReduce extends MapReduce {
 				partitions[partitionNum].deposit(key, value);
 				break;
 			} catch (InterruptedException e) {
-				//TODO
+				continue; //is the proper behavior?
 			}
 		}
 	}
@@ -27,6 +27,11 @@ public class MyMapReduce extends MapReduce {
 		this.mapperReducerObj = mapperReducerObj;
 		partitions = new PartitionTable[num_reducers];
 		Thread mappers[] = new Thread[num_mappers];
+
+		for (int i = 0; i < num_reducers; i++) {
+			partitions[i] = new PartitionTable(10);
+		}
+
 		for (int i = 0; i < num_mappers; i++) {
 			mappers[i] = new Thread(new Runnable() {
 				@Override
@@ -37,6 +42,29 @@ public class MyMapReduce extends MapReduce {
 			mappers[i].start();
 		}
 
+		Thread reducers[] = new Thread[num_mappers];
+		for (int i = 0; i < num_reducers; i++) {
+			reducers[i] = new Reducer(i);
+			reducers[i].start();
+		}
+
 		throw new UnsupportedOperationException();
+	}
+
+	private void bufferReduce(int partitionNum) {
+
+	}
+
+	private class Reducer extends Thread {
+
+		int bufferToReduce;
+
+		private Reducer(int i) {
+			bufferToReduce = i;
+		}
+
+		public void run() {
+			bufferReduce(bufferToReduce);
+		}
 	}
 }
