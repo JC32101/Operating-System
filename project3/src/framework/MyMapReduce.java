@@ -1,10 +1,15 @@
 package framework;
+import java.util.concurrent.locks.Condition;
 import java.util.logging.Level;
 public class MyMapReduce extends MapReduce {
 	private PartitionTable partitions[];
 	private MapperReducerClientAPI mapperReducerObj;
-	//public ConcurrentKVStore kvStore;
-	//What is in a running instance of MapReduce?
+	private ConcurrentKVStore kvStore;
+
+	public MyMapReduce() {
+		kvStore = new ConcurrentKVStore();
+	}
+
 	public void MREmit(Object key, Object value) {
 		int partitionNum = (int) mapperReducerObj.Partitioner(key, partitions.length);
 		while (true) {
@@ -12,7 +17,7 @@ public class MyMapReduce extends MapReduce {
 				partitions[partitionNum].deposit(key, value);
 				break;
 			} catch (InterruptedException e) {
-				continue; //is the proper behavior?
+				e.printStackTrace();
 			}
 		}
 	}
@@ -48,11 +53,25 @@ public class MyMapReduce extends MapReduce {
 			reducers[i].start();
 		}
 
-		throw new UnsupportedOperationException();
+		for (int i = 0; i < num_mappers; i++) {
+			try {
+				mappers[i].join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
-	private void bufferReduce(int partitionNum) {
+	private void emptyBuffer(int partitionNum) {
+		while(true) {
+			try {
+				Object key = partitions[partitionNum].fetch();
+				kvStore.put(key);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 
+		}
 	}
 
 	private class Reducer extends Thread {
@@ -64,7 +83,7 @@ public class MyMapReduce extends MapReduce {
 		}
 
 		public void run() {
-			bufferReduce(bufferToReduce);
+			emptyBuffer(bufferToReduce);
 		}
 	}
 }

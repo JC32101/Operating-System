@@ -32,7 +32,7 @@ public class PartitionTable extends BoundedBuffer{
         super.deposit(p);
     }
 
-    //TODO: your codde here
+
 	//Notes:
 	// (1) each partition works like a bounded buffer between
 	// mappers and a reducer. (you can assume size = 10 or 50)
