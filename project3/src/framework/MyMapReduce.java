@@ -24,8 +24,7 @@ public class MyMapReduce extends MapReduce {
 	}
 
 	public Object MRGetNext(Object key, int partition_number) {
-		//TODO: your code here. Delete UnsupportedOperationException after your implementation is done.
-		throw new UnsupportedOperationException();
+		return kvStore.getNext(key, partition_number);
 	}
 	@Override
 	protected void MRRunHelper(String inputFileName, MapperReducerClientAPI mapperReducerObj,
@@ -43,12 +42,7 @@ public class MyMapReduce extends MapReduce {
 
 		//start mapper threads
 		for (int i = 0; i < num_mappers; i++) {
-			mappers[i] = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					mapperReducerObj.Map(inputFileName);
-				}
-			});
+			mappers[i] = new Mapper(i, inputFileName);
 			mappers[i].start();
 		}
 
@@ -102,6 +96,21 @@ public class MyMapReduce extends MapReduce {
 		}
 	}
 
+	private class Mapper extends Thread {
+
+		int mapperNum;
+		String fileName;
+
+		public Mapper(int i, String fileName) {
+			mapperNum = i;
+			this.fileName = fileName;
+		}
+
+		public void run() {
+			mapperReducerObj.Map(fileName + ".0" + mapperNum);
+		}
+
+	}
 
 	private class Reducer extends Thread {
 

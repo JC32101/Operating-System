@@ -45,4 +45,14 @@ public class BoundedBuffer <T> {
         lock.unlock();
         return temp;
     }
+
+    public boolean isFull() {
+        if (count == capacity) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
+

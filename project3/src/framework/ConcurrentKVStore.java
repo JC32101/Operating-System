@@ -14,7 +14,9 @@ public class ConcurrentKVStore {
         keys = new ArrayList[numMaps];
         maps = new SimpleHashMap[numMaps];
         for (int i = 0; i < numMaps; i++) {
+            keys[i] = new ArrayList<String>();
             maps[i] = new SimpleHashMap();
+
         }
     }
 
@@ -23,6 +25,10 @@ public class ConcurrentKVStore {
             keys[mapNum].add(key.getKey());
         }
         maps[mapNum].put(key.getKey(), 1);
+    }
+
+    public Object getNext(Object key, int partitionNumber) {
+        return maps[partitionNumber].reduce((String)key);
     }
 
     public ArrayList<String> getKeys(int mapNum) {

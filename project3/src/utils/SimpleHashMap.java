@@ -73,17 +73,11 @@ public class SimpleHashMap<K, V>{
         if(table[i] == null) {
             table[i] = new Entry<K,V>(arg0, arg1);
         } else {
-            Entry<K,V> e = find(i, arg0);
-            if(e != null) {
-                V old_val = e.getValue();
-                e.setValue(arg1);
-                return old_val;
+            Entry<K,V> e = table[i];
+            while(e.getNext() != null) {
+                e = e.getNext();
             }
-            e = table[i];
-            while(e.next != null) {
-                e = e.next;
-            }
-            e.next = new Entry<K,V>(arg0, arg1);
+            e.setNext(new Entry<K,V>(arg0, arg1));
         }
         size++;
         if(size > capacity*loadfactor) {
@@ -130,6 +124,20 @@ public class SimpleHashMap<K, V>{
         }
     }
 
+    public Entry reduce(String key) {
+        int index = index((K) key);
+        Entry current = table[index];
+        while (current != null ) {
+            if(current.getKey().equals(key) && current.reductionStatus() == false) {
+                current.setReduced(true);
+                return current;
+            } else {
+                current = current.getNext();
+            }
+        }
+        return null;
+    }
+
     public int size() {
         return this.size;
     }
@@ -139,10 +147,12 @@ public class SimpleHashMap<K, V>{
         private K key;
         private V val;
         private Entry<K,V> next;
+        private boolean reduced;
 
         public Entry(K key, V val) {
             this.key = key;
             this.val = val;
+            reduced = false;
         }
 
         @Override
@@ -160,6 +170,20 @@ public class SimpleHashMap<K, V>{
             this.val = value;
             return val;
         }
+
+        public Entry getNext() {
+            return next;
+        }
+
+        public void setNext(Entry e) {
+            next = e;
+        }
+
+        public void setReduced(boolean status) {
+            reduced = status;
+        }
+
+        public boolean reductionStatus(){return reduced;}
 
         public String toString() {
             return key + "=" + val;
