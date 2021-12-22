@@ -1,4 +1,5 @@
 package framework;
+import java.util.ArrayList;
 import java.util.concurrent.locks.Condition;
 import java.util.logging.Level;
 public class MyMapReduce extends MapReduce {
@@ -14,7 +15,7 @@ public class MyMapReduce extends MapReduce {
 		int partitionNum = (int) mapperReducerObj.Partitioner(key, partitions.length);
 		while (true) {
 			try {
-				partitions[partitionNum].deposit(key, value);
+				partitions[partitionNum].deposit((String) key, value);
 				break;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -29,14 +30,18 @@ public class MyMapReduce extends MapReduce {
 	@Override
 	protected void MRRunHelper(String inputFileName, MapperReducerClientAPI mapperReducerObj,
 		    		  int num_mappers, int num_reducers) {
+		//setup
 		this.mapperReducerObj = mapperReducerObj;
 		partitions = new PartitionTable[num_reducers];
 		Thread mappers[] = new Thread[num_mappers];
+		kvStore.setup(num_reducers);
 
+		//create partitions
 		for (int i = 0; i < num_reducers; i++) {
 			partitions[i] = new PartitionTable(10);
 		}
 
+		//start mapper threads
 		for (int i = 0; i < num_mappers; i++) {
 			mappers[i] = new Thread(new Runnable() {
 				@Override
@@ -47,15 +52,35 @@ public class MyMapReduce extends MapReduce {
 			mappers[i].start();
 		}
 
+		//start reducer threads
 		Thread reducers[] = new Thread[num_mappers];
 		for (int i = 0; i < num_reducers; i++) {
 			reducers[i] = new Reducer(i);
 			reducers[i].start();
 		}
 
+		//join mappers
 		for (int i = 0; i < num_mappers; i++) {
 			try {
 				mappers[i].join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		//add EOF to partitions
+		for (int i = 0; i < num_reducers; i++) {
+			try {
+				partitions[i].deposit("EOF", 1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		//join reducers
+		for (int i = 0; i < num_reducers; i++) {
+			try {
+				reducers[i].join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -65,14 +90,18 @@ public class MyMapReduce extends MapReduce {
 	private void emptyBuffer(int partitionNum) {
 		while(true) {
 			try {
-				Object key = partitions[partitionNum].fetch();
-				kvStore.put(key);
+				KVPair key = (KVPair) partitions[partitionNum].fetch();
+				if ((key.getKey() == "EOF")) {
+					return;
+				}
+				kvStore.put(key, partitionNum);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 
 		}
 	}
+
 
 	private class Reducer extends Thread {
 
@@ -84,6 +113,10 @@ public class MyMapReduce extends MapReduce {
 
 		public void run() {
 			emptyBuffer(bufferToReduce);
+			ArrayList<String> keys = kvStore.getKeys(bufferToReduce);
+			for (int i = 0; i < keys.size(); i++) {
+				mapperReducerObj.Reduce(keys.get(i), bufferToReduce);
+			}
 		}
 	}
 }

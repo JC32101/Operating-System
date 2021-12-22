@@ -4,31 +4,12 @@ import utils.BoundedBuffer;
 
 public class PartitionTable extends BoundedBuffer{
 
-    private class PartPair {
-        Object key;
-        Object value;
-
-        PartPair(Object key, Object value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        Object getKey() {
-            return key;
-        }
-
-        Object getValue() {
-            return value;
-        }
-
-    }
-
     public PartitionTable(int size) {
         super(size);
     }
 
-    public void deposit(Object key, Object value) throws InterruptedException {
-        PartPair p = new PartPair(key, value);
+    public void deposit(String key, Object value) throws InterruptedException {
+        KVPair p = new KVPair(key, value);
         super.deposit(p);
     }
 
